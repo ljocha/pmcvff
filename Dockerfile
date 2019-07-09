@@ -1,7 +1,10 @@
 FROM continuumio/miniconda3
 
-COPY molekula.txt /
-COPY pipelineJupyter.ipynb /
+WORKDIR /app
+
+COPY molekula.txt /app
+COPY pipelineJupyter.ipynb /app
+COPY render_svg.py /app
 
 #install RDkit
 RUN conda install -c rdkit rdkit
@@ -14,7 +17,7 @@ RUN conda install molvs
 RUN conda install -y notebook
 
 RUN apt-get update
-#install LibXrender1
+#install LibXrender1 needed for RDkit library
 RUN apt-get install libxrender1
  
 EXPOSE 8888
