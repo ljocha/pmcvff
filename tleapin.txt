@@ -1,0 +1,6 @@
+source leaprc.gaff
+loadAmberPrep molekula.prepi 
+loadAmberParams molekula.frcmod
+mol = loadPdb NEWPDB.PDB
+saveAmberParm mol molekula.prmtop molekula.inpcrd
+quit
