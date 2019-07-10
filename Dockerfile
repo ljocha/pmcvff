@@ -1,13 +1,12 @@
 FROM continuumio/miniconda3
 
-WORKDIR /app
+WORKDIR /
 
-COPY molekula.txt /app
-COPY pipelineJupyter.ipynb /app
-COPY render_svg.py /app
+ADD modules /
+COPY molekula.txt pipelineJupyter.ipynb *.py modules/*.py /
 
-#install RDkit
-RUN conda install -c rdkit rdkit
+#install antechamber tools
+RUN conda install ambertools=19 -c ambermd
 
 #install molvs
 RUN conda config --add channels conda-forge
@@ -19,6 +18,9 @@ RUN conda install -y notebook
 RUN apt-get update
 #install LibXrender1 needed for RDkit library
 RUN apt-get install libxrender1
+#install py3Dmol and rdkit visualisation tools
+RUN pip install py3Dmol
+RUN conda install -c rdkit rdkit
  
 EXPOSE 8888
 
