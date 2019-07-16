@@ -1,9 +1,9 @@
 FROM continuumio/miniconda3
 
-WORKDIR /
+WORKDIR app/
 
-ADD modules /
-COPY molekula.txt pipelineJupyter.ipynb *.py modules/*.py /
+ADD modules app/
+COPY molekula.txt pipelineJupyter.ipynb *.py modules/*.py app/
 
 #install antechamber tools
 RUN conda install ambertools=19 -c ambermd
