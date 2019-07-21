@@ -1,10 +1,5 @@
 FROM continuumio/miniconda3
 
-WORKDIR app/
-
-ADD modules app/
-COPY molekula.txt pipelineJupyter.ipynb *.py modules/*.py app/
-
 #install antechamber tools
 RUN conda install ambertools=19 -c ambermd
 
@@ -21,6 +16,11 @@ RUN apt-get install libxrender1
 #install py3Dmol and rdkit visualisation tools
 RUN pip install py3Dmol
 RUN conda install -c rdkit rdkit
+
+WORKDIR app/
+
+ADD modules app/
+COPY molekula.txt pipelineJupyter.ipynb *.py modules/*.py app/
  
 EXPOSE 8888
 
