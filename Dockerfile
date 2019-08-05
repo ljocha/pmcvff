@@ -15,7 +15,6 @@ RUN cd /opt && \
 
 RUN bash -c "source /opt/intelpython3/bin/activate && conda install -y notebook pandas"
 RUN bash -c "source /opt/intelpython3/bin/activate && conda install -y -c openbabel openbabel"
-
 RUN bash -c "source /opt/intelpython3/bin/activate && conda install -y --freeze-installed -c conda-forge pypdb pydoe mdtraj nglview"
 
 ARG MINICONDA=Miniconda3-latest-Linux-x86_64.sh
@@ -24,19 +23,19 @@ COPY ${MINICONDA} /tmp
 
 RUN bash /tmp/${MINICONDA} -b -p ${CONDA}
 
-#RUN bash -c "source ${CONDA}/bin/activate && conda config --add channels intel"
-RUN bash -c "source ${CONDA}/bin/activate && conda install -c rdkit rdkit"
-#install antechamber tools
-RUN bash -c "source ${CONDA}/bin/activate && conda install ambertools=19 -c ambermd"
-#install molvs
-RUN bash -c "source ${CONDA}/bin/activate && conda install -c conda-forge molvs"
-#need to add channel conda-forge before installing py3dmol
-RUN bash -c "source ${CONDA}/bin/activate && conda config --add channels conda-forge"
-RUN bash -c "source ${CONDA}/bin/activate && conda install -c rmg py3dmol"
-
-
 #install LibXrender1 needed for RDkit library
 RUN apt-get update && apt-get install -y libxrender1
+
+#install antechamber tools
+RUN bash -c "source /opt/intelpython3/bin/activate && conda install ambertools=19 -c ambermd"
+#install molvs
+RUN bash -c "source /opt/intelpython3/bin/activate && conda install -c conda-forge molvs"
+#need to add channel conda-forge before installing py3dmol
+RUN bash -c "source /opt/intelpython3/bin/activate && conda config --add channels conda-forge"
+RUN bash -c "source /opt/intelpython3/bin/activate && conda install -c rmg py3dmol"
+RUN bash -c "source /opt/intelpython3/bin/activate && conda install -c rdkit rdkit"
+RUN bash -c "source /opt/intelpython3/bin/activate && conda install -c conda-forge xorg-libxext"
+RUN bash -c "source /opt/intelpython3/bin/activate && conda install -c conda-forge pillow"
 
 ADD modules app/
 COPY molekula.txt pipelineJupyter.ipynb *.py modules/*.py app/
