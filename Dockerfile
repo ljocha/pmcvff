@@ -1,4 +1,3 @@
-#source: https://gitlab.ics.muni.cz/3086/chicken-and-egg/blob/master/Dockerfile
 FROM ljocha/gromacs:2019.4.30-1
 
 USER root
@@ -8,43 +7,42 @@ ENV TZ=Europe/Prague
 
 ARG INTELPYTHON=l_pythoni3_p_2019.4.088.tar.gz
 COPY ${INTELPYTHON} /tmp
-
 RUN cd /opt && \
-       tar xzf /tmp/${INTELPYTHON} && \
-       cd intelpython3 && \
-       ./setup_intel_python.sh && \
-       echo source /opt/intelpython3/bin/activate  >>/etc/bash.bashrc && rm /tmp/${INTELPYTHON}
+    tar xzf /tmp/${INTELPYTHON} && \
+    cd intelpython3 && \
+    ./setup_intel_python.sh && \
+    echo source /opt/intelpython3/bin/activate  >>/etc/bash.bashrc && rm /tmp/${INTELPYTHON}
 
 RUN bash -c "source /opt/intelpython3/bin/activate && conda install -y notebook pandas"
 RUN bash -c "source /opt/intelpython3/bin/activate && conda install -y -c openbabel openbabel"
+
 RUN bash -c "source /opt/intelpython3/bin/activate && conda install -y --freeze-installed -c conda-forge pypdb pydoe mdtraj nglview"
 
-FROM continuumio/miniconda3
+ARG MINICONDA=Miniconda3-latest-Linux-x86_64.sh
+ARG CONDA=/opt/miniconda3
+COPY ${MINICONDA} /tmp
 
+RUN bash /tmp/${MINICONDA} -b -p ${CONDA}
+
+#RUN bash -c "source ${CONDA}/bin/activate && conda config --add channels intel"
+RUN bash -c "source ${CONDA}/bin/activate && conda install -c rdkit rdkit"
 #install antechamber tools
-RUN conda install ambertools=19 -c ambermd
-
+RUN bash -c "source ${CONDA}/bin/activate && conda install ambertools=19 -c ambermd"
 #install molvs
-RUN conda config --add channels conda-forge
-RUN conda install molvs
+RUN bash -c "source ${CONDA}/bin/activate && conda install -c conda-forge molvs"
+#need to add channel conda-forge before installing py3dmol
+RUN bash -c "source ${CONDA}/bin/activate && conda config --add channels conda-forge"
+RUN bash -c "source ${CONDA}/bin/activate && conda install -c rmg py3dmol"
 
-#install jupyter notebook
-RUN conda install -y notebook
-RUN apt-get update
 
 #install LibXrender1 needed for RDkit library
-RUN apt-get install libxrender1
-
-#install py3Dmol and rdkit visualisation tools
-RUN pip install py3Dmol
-RUN conda install -c rdkit rdkit
-
-WORKDIR app/
+RUN apt-get update && apt-get install -y libxrender1
 
 ADD modules app/
 COPY molekula.txt pipelineJupyter.ipynb *.py modules/*.py app/
+
+WORKDIR app/
  
 EXPOSE 8888
 
-CMD bash -c "jupyter notebook --allow-root --ip 0.0.0.0 --port 8888"
-
+CMD bash -c "sleep 2 && source /opt/intelpython3/bin/activate && jupyter notebook --ip 0.0.0.0 --allow-root --port 8888"
