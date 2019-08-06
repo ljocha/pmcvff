@@ -17,12 +17,6 @@ RUN bash -c "source /opt/intelpython3/bin/activate && conda install -y notebook 
 RUN bash -c "source /opt/intelpython3/bin/activate && conda install -y -c openbabel openbabel"
 RUN bash -c "source /opt/intelpython3/bin/activate && conda install -y --freeze-installed -c conda-forge pypdb pydoe mdtraj nglview"
 
-ARG MINICONDA=Miniconda3-latest-Linux-x86_64.sh
-ARG CONDA=/opt/miniconda3
-COPY ${MINICONDA} /tmp
-
-RUN bash /tmp/${MINICONDA} -b -p ${CONDA}
-
 #install LibXrender1 needed for RDkit library
 RUN apt-get update && apt-get install -y libxrender1
 
@@ -38,7 +32,7 @@ RUN bash -c "source /opt/intelpython3/bin/activate && conda install -c conda-for
 RUN bash -c "source /opt/intelpython3/bin/activate && conda install -c conda-forge pillow"
 
 ADD modules app/
-COPY molekula.txt pipelineJupyter.ipynb *.py modules/*.py app/
+COPY molekula.txt tleapin.txt pipelineJupyter.ipynb *.py modules/*.py app/
 
 WORKDIR app/
  
