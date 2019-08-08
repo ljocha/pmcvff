@@ -30,9 +30,10 @@ RUN bash -c "source /opt/intelpython3/bin/activate && conda install -c rmg py3dm
 RUN bash -c "source /opt/intelpython3/bin/activate && conda install -c rdkit rdkit"
 RUN bash -c "source /opt/intelpython3/bin/activate && conda install -c conda-forge xorg-libxext"
 RUN bash -c "source /opt/intelpython3/bin/activate && conda install -c conda-forge pillow"
+RUN bash -c "source /opt/intelpython3/bin/activate && conda install -c conda-forge acpype"
 
 ADD modules app/
-COPY molekula.txt tleapin.txt pipelineJupyter.ipynb *.py modules/*.py app/
+COPY molekula.txt tleapin.txt pipelineJupyter.ipynb modules/*.py app/
 
 WORKDIR app/
  
