@@ -1,11 +1,11 @@
-FROM ljocha/gromacs:2019.4.30-1
+FROM ljocha/gromacs:latest
 
 USER root
 
 ENV DEBIAN_FRONTEND=noninteractive 
 ENV TZ=Europe/Prague
 
-ARG INTELPYTHON=l_pythoni3_p_2019.4.088.tar.gz
+ARG INTELPYTHON=l_pythoni3_p_2019.5.098.tar.gz
 COPY ${INTELPYTHON} /tmp
 RUN cd /opt && \
     tar xzf /tmp/${INTELPYTHON} && \
@@ -28,9 +28,10 @@ RUN bash -c "source /opt/intelpython3/bin/activate && conda install -c conda-for
 RUN bash -c "source /opt/intelpython3/bin/activate && conda config --add channels conda-forge"
 RUN bash -c "source /opt/intelpython3/bin/activate && conda install -c rmg py3dmol"
 RUN bash -c "source /opt/intelpython3/bin/activate && conda install -c rdkit rdkit"
+RUN bash -c "source /opt/intelpython3/bin/activate && conda install -c conda-forge acpype"
 RUN bash -c "source /opt/intelpython3/bin/activate && conda install -c conda-forge xorg-libxext"
 RUN bash -c "source /opt/intelpython3/bin/activate && conda install -c conda-forge pillow"
-RUN bash -c "source /opt/intelpython3/bin/activate && conda install -c conda-forge acpype"
+RUN bash -c "apt-get update && apt-get install -y libgfortran3"
 
 ADD modules app/
 COPY molekula.txt tleapin.txt pipelineJupyter.ipynb modules/*.py app/
