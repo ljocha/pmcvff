@@ -1,4 +1,4 @@
-FROM ljocha/gromacs:latest
+FROM ljocha/gromacs:2019.9.5-3
 
 USER root
 
@@ -28,9 +28,11 @@ RUN bash -c "source /opt/intelpython3/bin/activate && conda install -c conda-for
 RUN bash -c "source /opt/intelpython3/bin/activate && conda config --add channels conda-forge"
 RUN bash -c "source /opt/intelpython3/bin/activate && conda install -c rmg py3dmol"
 RUN bash -c "source /opt/intelpython3/bin/activate && conda install -c rdkit rdkit"
+#install acpype and its needed packages xorg-libxext and pillow
 RUN bash -c "source /opt/intelpython3/bin/activate && conda install -c conda-forge acpype"
 RUN bash -c "source /opt/intelpython3/bin/activate && conda install -c conda-forge xorg-libxext"
 RUN bash -c "source /opt/intelpython3/bin/activate && conda install -c conda-forge pillow"
+#install missing library for ambertools
 RUN bash -c "apt-get update && apt-get install -y libgfortran3"
 
 ADD modules app/
