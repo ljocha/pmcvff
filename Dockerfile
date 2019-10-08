@@ -18,7 +18,7 @@ RUN bash -c "source /opt/intelpython3/bin/activate && conda install -y -c openba
 RUN bash -c "source /opt/intelpython3/bin/activate && conda install -y --freeze-installed -c conda-forge pypdb pydoe mdtraj nglview"
 
 #install LibXrender1 needed for RDkit library
-RUN apt-get update && apt-get install -y libxrender1
+RUN apt-get update && apt-get install -y libxrender1 libgfortran3
 
 #install antechamber tools
 RUN bash -c "source /opt/intelpython3/bin/activate && conda install ambertools=19 -c ambermd"
@@ -33,7 +33,7 @@ RUN bash -c "source /opt/intelpython3/bin/activate && conda install -c conda-for
 RUN bash -c "source /opt/intelpython3/bin/activate && conda install -c conda-forge xorg-libxext"
 RUN bash -c "source /opt/intelpython3/bin/activate && conda install -c conda-forge pillow"
 #install missing library for ambertools
-RUN bash -c "apt-get update && apt-get install -y libgfortran3"
+#RUN bash -c "apt-get update && apt-get install -y libgfortran3"
 
 ADD modules app/
 COPY molekula.txt tleapin.txt pipelineJupyter.ipynb modules/*.py app/
