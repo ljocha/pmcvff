@@ -13,9 +13,15 @@ RUN cd /opt && \
     ./setup_intel_python.sh && \
     echo source /opt/intelpython3/bin/activate  >>/etc/bash.bashrc && rm /tmp/${INTELPYTHON}
 
-RUN bash -c "source /opt/intelpython3/bin/activate && conda install -y notebook pandas"
-RUN bash -c "source /opt/intelpython3/bin/activate && conda install -y -c openbabel openbabel"
+#install jupyter and widgets used for visualisation
+RUN bash -c "source /opt/intelpython3/bin/activate && conda install -y -c conda-forge jupyter"
+RUN bash -c "source /opt/intelpython3/bin/activate && conda install -n base -c conda-forge widgetsnbextension"
+RUN bash -c "source /opt/intelpython3/bin/activate && conda install -c conda-forge ipywidgets"
 RUN bash -c "source /opt/intelpython3/bin/activate && conda install -y --freeze-installed -c conda-forge pypdb pydoe mdtraj nglview"
+RUN bash -c "source /opt/intelpython3/bin/activate && jupyter-nbextension enable nglview --py --sys-prefix"
+RUN bash -c "source /opt/intelpython3/bin/activate && conda install -y -c openbabel openbabel"
+
+RUN bash -c "source /opt/intelpython3/bin/activate && conda install -y pandas"
 
 #install LibXrender1 needed for RDkit library
 RUN apt-get update && apt-get install -y libxrender1 libgfortran3
