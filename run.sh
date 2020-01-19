@@ -1,6 +1,7 @@
 #!/bin/bash
 
 #create directories needed for orca docker to pull from information
+rm -rf cluster
 mkdir cluster
 mkdir cluster/am1; mkdir cluster/am1/input; mkdir cluster/am1/output
 mkdir cluster/bp86; mkdir cluster/bp86/input; mkdir cluster/bp86/output

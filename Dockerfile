@@ -30,7 +30,6 @@ RUN apt-get update && apt-get install -y libxrender1 libgfortran3
 RUN bash -c "source /opt/intelpython3/bin/activate && conda install ambertools=19 -c ambermd"
 #install molvs
 RUN bash -c "source /opt/intelpython3/bin/activate && conda install -c conda-forge molvs"
-#need to add channel conda-forge before installing py3dmol
 RUN bash -c "source /opt/intelpython3/bin/activate && conda config --add channels conda-forge"
 RUN bash -c "source /opt/intelpython3/bin/activate && conda install -c rmg py3dmol"
 RUN bash -c "source /opt/intelpython3/bin/activate && conda install -c rdkit rdkit"
@@ -38,14 +37,16 @@ RUN bash -c "source /opt/intelpython3/bin/activate && conda install -c rdkit rdk
 RUN bash -c "source /opt/intelpython3/bin/activate && conda install -c conda-forge acpype"
 RUN bash -c "source /opt/intelpython3/bin/activate && conda install -c conda-forge xorg-libxext"
 RUN bash -c "source /opt/intelpython3/bin/activate && conda install -c conda-forge pillow"
-#install missing library for ambertools
-#RUN bash -c "apt-get update && apt-get install -y libgfortran3"
+RUN bash -c "apt-get install xz-utils"
 
-ADD modules app/
-COPY molekula.txt tleapin.txt pipelineJupyter.ipynb modules/*.py app/
+ADD modules app/modules
+ADD gromacs-plumed-docker/gromacs /opt/gromacs
+COPY molekula.txt tleapin.txt pipelineJupyter.ipynb app/
 
 WORKDIR app/
  
 EXPOSE 8888
+
+RUN apt-get update && apt install -y docker.io
 
 CMD bash -c "sleep 2 && source /opt/intelpython3/bin/activate && jupyter notebook --ip 0.0.0.0 --allow-root --port 8888"
