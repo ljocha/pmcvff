@@ -1,14 +1,14 @@
 #!/bin/bash
 
 #create directories needed for orca docker to pull from information
-rm -rf cluster
-mkdir cluster
-mkdir cluster/am1; mkdir cluster/am1/input; mkdir cluster/am1/output
-mkdir cluster/bp86; mkdir cluster/bp86/input; mkdir cluster/bp86/output
+mkdir work
+mkdir work/am1; mkdir work/am1/input; mkdir work/am1/output
+mkdir work/bp86; mkdir work/bp86/input; mkdir work/bp86/output
+cp pipelineJupyter.ipynb work/
 
 docker run -v /var/run/docker.sock:/var/run/docker.sock \
-           -v $HOME/work/magicforcefield-pipeline/cluster:/work \
-           -e WORK=$HOME/work/magicforcefield-pipeline/cluster \
+           -v $HOME/work/magicforcefield-pipeline/work:/work \
+           -e WORK=$HOME/work/magicforcefield-pipeline/work \
            --name pipeline \
            -ti \
            -p 8888:8888 \
