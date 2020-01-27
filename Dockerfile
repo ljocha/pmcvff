@@ -4,6 +4,7 @@ USER root
 
 ENV DEBIAN_FRONTEND=noninteractive 
 ENV TZ=Europe/Prague
+ENV BASE=/home/gromacs/base
 
 ARG INTELPYTHON=l_pythoni3_p_2019.5.098.tar.gz
 COPY ${INTELPYTHON} /tmp
@@ -39,11 +40,11 @@ RUN bash -c "source /opt/intelpython3/bin/activate && conda install -c conda-for
 RUN bash -c "source /opt/intelpython3/bin/activate && conda install -c conda-forge pillow"
 RUN bash -c "apt-get install xz-utils"
 
-ADD modules app/modules
-ADD gromacs-plumed-docker/gromacs /opt/gromacs
-COPY molekula.txt tleapin.txt pipelineJupyter.ipynb app/
+ADD modules base/modules
+ADD gromacs-plumed-docker /opt/gromacs
+COPY molekula.txt tleapin.txt pipelineJupyter.ipynb base/
 
-WORKDIR app/
+WORKDIR /work
  
 EXPOSE 8888
 
