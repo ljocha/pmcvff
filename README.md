@@ -1,5 +1,7 @@
 Run instructions:
 
-1. For interactive run (open pipeline straight in jupyter notebook), execute script notebook_run.sh
+1. Execute script build.sh which will build the docker image for pipeline
 
-2. For run in container, execute script run.sh
+2a. For interactive run (open pipeline straight in jupyter notebook), execute script notebook_run.sh
+   
+2b. For run in container, execute script run.sh
