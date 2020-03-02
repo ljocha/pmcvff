@@ -1,6 +1,6 @@
 #!/bin/bash
 
-eval set -- $(getopt -o +jh -- "$@")
+eval set -- $(getopt -o +jh --)
 
 #image name
 IMAGE_NAME="pipeline:latest"
