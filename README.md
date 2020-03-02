@@ -13,5 +13,5 @@ which has to be downloaded/set manually:
 
 1. Execute script build.sh which will build the podman image for pipeline
 2. For interactive run and open in jupyter notebook, execute script run.sh with flag -j (./run.sh -j) 
-3. // For run and open pipeline container, execute script run.sh without flags (./run.sh)
+// For run and open pipeline container, execute script run.sh without flags (./run.sh)
 
