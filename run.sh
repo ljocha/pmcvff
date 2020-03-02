@@ -11,7 +11,7 @@ SHARED_DIR="work"
 #flag needed to run podman on glados4
 ROOT_TMP="--root=/scratch.ssd/${USER}/tmp"
 #directory where everything necessary to run the pipeline is located
-BASE_DIR="/storage/brno3-cerit/home/${USER}/${SHARED_DIR}" 
+BASE_DIR="/storage/brno3-cerit/home/${USER}/magicforcefield-pipeline/${SHARED_DIR}" 
 #select run mode of podman container
 RUN_MODE="-ti"
 #select software to open pipeline in
@@ -39,6 +39,9 @@ mkdir ${SHARED_DIR}/clustering
 mkdir ${SHARED_DIR}/clustering/outClustersPDB
 mkdir ${SHARED_DIR}/clustering/outClustersXYZ
 mkdir ${SHARED_DIR}/clustering/orcaClusters
+
+#run daemon to watch socket in SHARED_DIR and execute external container when needed
+./podmand.py & 
 
 cp {tleapin.txt,pipelineJupyter.ipynb} ${SHARED_DIR}
 

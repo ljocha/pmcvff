@@ -43,7 +43,7 @@ RUN bash -c "apt-get install xz-utils"
 #RUN apt-get update && apt install -y docker.io
 
 ADD modules ${BASE}/modules/
-ADD gromacs-plumed-docker/gromacs/podman-run.py /opt/
+ADD podman-run.py /opt/
 COPY molekula.txt tleapin.txt pipelineJupyter.ipynb get_pdbs ${BASE}/
 
 WORKDIR ${SHARED_DIR}
