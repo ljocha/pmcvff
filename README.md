@@ -5,7 +5,7 @@ which has to be downloaded/set manually:
 
 * Podman: https://podman.io/
 
-* IntelPython: https://software.intel.com/en-us/distribution-for-python/choose-download
+* IntelPython: https://software.intel.com/en-us/distribution-for-python/choose-download\n
     * note1: if there has been released new version, which is not set in Dockerfile, contact me or just set new version in Dockerfile manually
     * note2: download it to pipeline directory (where Dockerfile is)
 
