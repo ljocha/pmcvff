@@ -1,6 +1,8 @@
 #!/bin/bash
 
-git clone git@gitlab.ics.muni.cz:3086/gromacs-plumed-docker.git 
-#cd gromacs-plumed-docker && make gromacs/gmx_docker
+#image name
+IMAGE_NAME="pipeline:latest"
+#flag needed to run podman on glados4
+ROOT_TMP="--root=/scratch.ssd/${USER}/tmp"
 
-docker build -t pipeline:latest .
+podman build ${ROOT_TMP} -t ${IMAGE_NAME} .
