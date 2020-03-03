@@ -1,6 +1,6 @@
 #!/bin/bash
 
-eval set -- $(getopt -o +jh --)
+eval set -- $(getopt -o +jh -- "$@")
 
 #image name
 IMAGE_NAME="pipeline:latest"
@@ -10,7 +10,7 @@ CONTAINER_NAME="pipeline"
 SHARED_DIR="work"
 #flag needed to run podman on glados4
 ROOT_TMP="--root=/scratch.ssd/${USER}/tmp"
-#directory where everything necessary to run the pipeline is located
+#directory where everything shared between container and host is located
 BASE_DIR="/storage/brno3-cerit/home/${USER}/magicforcefield-pipeline/${SHARED_DIR}" 
 #select run mode of podman container
 RUN_MODE="-ti"
@@ -41,11 +41,15 @@ mkdir ${SHARED_DIR}/clustering/outClustersXYZ
 mkdir ${SHARED_DIR}/clustering/orcaClusters
 
 #run daemon to watch socket in SHARED_DIR and execute external container when needed
-./podmand.py & 
+./podmand.py &
+_podmand_pid=$!
 
 cp {tleapin.txt,pipelineJupyter.ipynb} ${SHARED_DIR}
 
 podman run --name ${CONTAINER_NAME} ${ROOT_TMP} -p 8888:8888 -v ${BASE_DIR}:/${SHARED_DIR} ${RUN_MODE} ${IMAGE_NAME} ${RUN_EXEC}
+
+kill ${_podmand_pid}
+echo "container \"${CONTAINER_NAME}\" and podman daemon \"${_podmand_pid}\" terminated; to remove all files and containers, run destroy.sh"
 
 #docker run -v /var/run/docker.sock:/var/run/docker.sock \
 #           -v $HOME/${SHARED_DIR}/magicforcefield-pipeline/${SHARED_DIR}:/${SHARED_DIR} \
