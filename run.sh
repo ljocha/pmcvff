@@ -1,5 +1,7 @@
 #!/bin/bash
 
+source config.sh
+
 eval set -- $(getopt -o +jh -- "$@")
 
 #image name

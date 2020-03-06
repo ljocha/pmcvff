@@ -1,5 +1,7 @@
 #!/bin/bash
 
+source config.sh
+
 #container name
 CONTAINER_NAME="pipeline"
 #directory shared between host and container
