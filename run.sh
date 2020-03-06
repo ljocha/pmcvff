@@ -6,12 +6,6 @@ eval set -- $(getopt -o +jh -- "$@")
 
 #image name
 IMAGE_NAME="pipeline:latest"
-#container name
-CONTAINER_NAME="pipeline"
-#directory shared between host and container
-SHARED_DIR="work"
-#flag needed to run podman on glados4
-ROOT_TMP="--root=/scratch.ssd/${USER}/tmp"
 #directory where everything shared between container and host is located
 BASE_DIR="/storage/brno3-cerit/home/${USER}/magicforcefield-pipeline/${SHARED_DIR}" 
 #select run mode of podman container
