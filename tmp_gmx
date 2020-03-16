@@ -1,40 +1,27 @@
 #!/bin/bash
 
-WORKDIR_OUTSIDE='${PWD}/'
+WORKDIR_OUTSIDE='${PWD}/work'
 WORKDIR_CURRENT=""
 DOUBLE=""
 MPIRUN=""
 
-function main() {
-	local gmx_args=$(manage_flags $@)
-	execute_gromacs $gmx_args
-}
+while getopts ":n:da:rw:Rv:g" opt; do
+	case $opt in
+		n) MPI="$OPTARG" ;;
+		d) DOUBLE="_d" ;;
+		w) WORKDIR_CURRENT="$OPTARG" ;;
+		g) break ;;
+		\?) echo "invalid input, use -h to get list of all available options"; exit 1 ;;
+	esac
+done
 
-function manage_flags() {
-	local OPTIND opt
-	while getopts ":n:da:rw:Rv:g" opt; do
-		case $opt in
-			n) MPI="$OPTARG" ;;
-        		d) DOUBLE="_d" ;;
-        		w) WORKDIR_CURRENT="$OPTARG" ;;
-			g) break ;;
-		        \?) echo "invalid input, use -h to get list of all available options"; exit 1 ;;
-		esac
-	done
-
-	shift $((OPTIND -1))
-	#echo $((OPTIND -1))
-	echo $@
-}
+shift $((OPTIND -1))
 
 unset MPIRUN
 if [ -n "$MPI" ]; then
         MPIRUN="mpirun -np $MPI"
 fi
 
-function execute_gromacs() {
-	/opt/podman-run.py --root=/scratch.ssd/xvisnov1/tmp run -v ${WORKDIR_OUTSIDE}${WORKDIR_CURRENT}:/tmp ljocha/gromacs_avx2${DOUBLE}:2020.01.14-1 $MPIRUN gmx "$@"
-	echo $command
-}
-
-main $@
+/opt/podman-run.py --root=/scratch.ssd/xvisnov1/tmp run -v ${WORKDIR_OUTSIDE}${WORKDIR_CURRENT}:/tmp ljocha/gromacs_avx2${DOUBLE}:2020.01.14-1 $MPIRUN gmx "$@"
+#command="/opt/podman-run.py --root=/scratch.ssd/xvisnov1/tmp run -v ${WORKDIR_OUTSIDE}${WORKDIR_CURRENT}:/tmp ljocha/gromacs_avx2${DOUBLE}:2020.01.14-1 $MPIRUN gmx "$@""
+#echo $command
