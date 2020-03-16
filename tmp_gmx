@@ -1,0 +1,33 @@
+#!/bin/bash
+
+function main() {
+	local gmx_args=$(manage_flags $@)
+	execute_gromacs $gmx_args
+}
+
+function manage_flags() {
+	local OPTIND opt
+	while getopts ":n:da:rw:Rv:g" opt; do
+		case $opt in
+			n) MPI="$OPTARG" ;;
+        		d) DOUBLE="_d" ;;
+        		a) ARCH="$OPTARG" ;;
+        		r) RDTSCP="_ts" ;;
+        		w) WORKDIR_CURRENT="$OPTARG" ;;
+        		R) RDTSCP="" ;;
+        		v) VERSION=":$OPTARG" ;;
+			g) break ;;
+		        \?) echo "invalid input, use -h to get list of all available options"; exit 1 ;;
+		esac
+	done
+
+	shift $((OPTIND -1))
+	#echo $((OPTIND -1))
+	echo $@
+}
+
+function execute_gromacs() {
+	/opt/podman-run.py --root=/scratch.ssd/xvisnov1/tmp run -u $(id -u):$(id -g) -i -v ${WORKDIR_OUTSIDE}${WORKDIR_CURRENT}:/tmp ${IMAGE}/gromacs_${ARCH}${RDTSCP}${DOUBLE}${VERSION} $MPIRUN gmx "$@"
+}
+
+main $@
