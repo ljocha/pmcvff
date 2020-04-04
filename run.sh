@@ -4,10 +4,8 @@ source config.sh
 
 eval set -- $(getopt -o +jh -- "$@")
 
-#image name
-IMAGE_NAME="pipeline:latest"
 #directory where everything shared between container and host is located
-BASE_DIR="/storage/brno3-cerit/home/${USER}/magicforcefield-pipeline/${SHARED_DIR}" 
+BASE_DIR="${HOME}/magicforcefield-pipeline/${SHARED_DIR}"
 #select run mode of podman container
 RUN_MODE="-ti"
 #select software to open pipeline in
@@ -38,14 +36,25 @@ mkdir ${SHARED_DIR}/clustering/orcaClusters
 
 #run daemon to watch socket in SHARED_DIR and execute external container when needed
 ./podmand.py &
-_podmand_pid=$!
+PODMAND_PID=$!
+#export PODMAND_PID
+
+trap ctrlc_func INT
+
+ctrlc_func() {
+	kill $PODMAND_PID
+	echo "\npodmand terminated\n"
+	exit 2
+}
+
 
 cp {tleapin.txt,pipelineJupyter.ipynb} ${SHARED_DIR}
 
-podman run --name ${CONTAINER_NAME} ${ROOT_TMP} -p 8888:8888 -v ${BASE_DIR}:/${SHARED_DIR} ${RUN_MODE} ${IMAGE_NAME} ${RUN_EXEC}
+cd /tmp
+podman --root ${ROOT_TMP} --runtime /usr/bin/crun run --name ${CONTAINER_NAME} --privileged --cgroups disabled -v ${BASE_DIR}:/${SHARED_DIR} -e HOME=/work -p 8888:8888 -ti ${IMAGE_NAME} bash -c "source /opt/intelpython3/bin/activate && jupyter notebook --ip 0.0.0.0 --port 8888 --allow-root"
 
-kill ${_podmand_pid}
-echo "container \"${CONTAINER_NAME}\" and podman daemon \"${_podmand_pid}\" terminated; to remove all files and containers, run destroy.sh"
+#podman run --name ${CONTAINER_NAME} --root=${ROOT_TMP} -p 8888:8888 -v ${BASE_DIR}:/${SHARED_DIR} ${RUN_MODE} ${IMAGE_NAME} ${RUN_EXEC}
+
 
 #docker run -v /var/run/docker.sock:/var/run/docker.sock \
 #           -v $HOME/${SHARED_DIR}/magicforcefield-pipeline/${SHARED_DIR}:/${SHARED_DIR} \
