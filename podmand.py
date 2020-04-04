@@ -2,10 +2,11 @@
 
 import os
 import socket
+import sys
 
 socket_path = "work/podmand.sock"
-
-podman = "echo"
+orca = os.environ['HOME'] + "/magicforcefield-pipeline/orca-docker"
+gromacs = os.environ['HOME'] + "/magicforcefield-pipeline/gromacs-plumed-docker/gromacs/gmx-docker"
 
 server = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
 try:
@@ -17,13 +18,20 @@ server.bind(socket_path)
 server.listen()
 
 while True:
-	conn,_addr = server.accept()
-	cmd = conn.recv(1024).decode('utf-8')
-	if not cmd:
-		break
-	else:
-		os.system(podman + " " + cmd)
-		conn.send("done".encode('utf-8'))
+    conn,_addr = server.accept()
+    cmd = conn.recv(1024).decode('utf-8')
+    print(cmd)
+    if not cmd:
+            break
+    else:
+        if "gromacs" in cmd:
+            os.system("cd /tmp; " + gromacs + cmd[len("gromacs"):])
+        elif "orca" in cmd:
+            print("found orca")
+            os.system("cd /tmp; " + orca + " " + cmd[len("orca"):])
+        else:
+            conn.send("error choosing between containers".encode('utf-8'))
+        conn.send("done".encode('utf-8'))
 		
 
 server.close()
