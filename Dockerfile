@@ -44,7 +44,7 @@ RUN bash -c "apt-get install xz-utils"
 
 ADD modules ${BASE}/modules/
 ADD podman-run.py /opt/
-COPY molekula.txt tleapin.txt pipelineJupyter.ipynb get_pdbs ${BASE}/
+COPY molekula.txt tleapin.txt pipelineJupyter.ipynb ${BASE}/
 
 WORKDIR ${SHARED_DIR}
  
