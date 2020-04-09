@@ -4,7 +4,7 @@ import socket
 import os
 import sys
 
-socket_path = "/work/podmand.sock"
+socket_path = "work/podmand.sock"
 
 client = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
 client.connect(socket_path)
