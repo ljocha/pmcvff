@@ -1,8 +1,5 @@
 #!/bin/bash
 
-#image name
-IMAGE_NAME="pipeline:latest"
-#flag needed to run podman on glados4
-ROOT_TMP="--root=/scratch.ssd/${USER}/tmp"
+source config.sh
 
-podman build ${ROOT_TMP} -t ${IMAGE_NAME} .
+podman --root=${ROOT_TMP} build  -t ${IMAGE_NAME} .
