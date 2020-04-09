@@ -20,15 +20,13 @@ server.listen()
 while True:
     conn,_addr = server.accept()
     cmd = conn.recv(1024).decode('utf-8')
-    print(cmd)
     if not cmd:
             break
     else:
         if "gromacs" in cmd:
             os.system("cd /tmp; " + gromacs + cmd[len("gromacs"):])
         elif "orca" in cmd:
-            print("found orca")
-            os.system("cd /tmp; " + orca + " " + cmd[len("orca"):])
+            os.system("cd /tmp; " + orca + " " + cmd[len("orca"):] + " > " + os.environ['WORK'] + "/orca_output.log ")
         else:
             conn.send("error choosing between containers".encode('utf-8'))
         conn.send("done".encode('utf-8'))

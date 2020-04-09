@@ -1,12 +1,16 @@
 import os
 
 
-def convert_to_orca_methods(input_path, output_path, torsions, method):
+def convert_to_orca_methods(input_path, output_path, torsions, method_desc, nprocs):
     for xyz_cluster in os.listdir(input_path):
         if (not xyz_cluster.endswith(".xyz")) or (xyz_cluster.endswith("trj.xyz")):
             continue
         output_file = open(output_path + xyz_cluster.replace(".xyz", ".inp"), "w")
-        output_file.write(method + os.linesep)
+        output_file.write(method_desc + os.linesep)
+        if nprocs != -1:
+            output_file.write("%pal" + os.linesep)
+            output_file.write("nprocs " + nprocs + os.linesep)
+            output_file.write("end" + os.linesep)
         output_file.write("%geom" + os.linesep)
         output_file.write("Constraints" + os.linesep)
         write_torsions(output_file, torsions)
