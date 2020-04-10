@@ -23,10 +23,16 @@ while True:
     if not cmd:
             break
     else:
-        if "gromacs" in cmd:
-            os.system("cd /tmp; " + gromacs + cmd[len("gromacs"):])
-        elif "orca" in cmd:
-            os.system("cd /tmp; " + orca + " " + cmd[len("orca"):] + " > " + os.environ['WORK'] + "/orca_output.log ")
+        parsed_cmd = cmd.split(" ", 3)
+        print(parsed_cmd)
+        if parsed_cmd[0] == "gromacs":
+            os.system("cd /tmp; " + gromacs + " ".join(parsed_cmd[1:]))
+        elif parsed_cmd[0] == "orca":
+            if parsed_cmd[1] == "am1" or parsed_cmd[1] == "bp86":
+                #tst = "cd /tmp; " + orca + " " + " ".join(parsed_cmd[3:]) + " > " + os.environ['WORK'] + "/orca_output/{}/orca_output{}.log ".format(parsed_cmd[1], parsed_cmd[2])
+                #print(tst)
+                
+                os.system("cd /tmp; " + orca + " " + " ".join(parsed_cmd[3:]) + " > " + os.environ['WORK'] + "/orca_output/{}/orca_output{}.log ".format(parsed_cmd[1], parsed_cmd[2]))
         else:
             conn.send("error choosing between containers".encode('utf-8'))
         conn.send("done".encode('utf-8'))

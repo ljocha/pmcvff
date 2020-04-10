@@ -14,6 +14,7 @@ RUN_EXEC="bash"
 
 #create directories for pipeline temporary results 
 mkdir ${SHARED_DIR}
+mkdir ${SHARED_DIR}/orca_output; mkdir ${SHARED_DIR}/orca_output/am1; mkdir ${SHARED_DIR}/orca_output/bp86
 mkdir ${SHARED_DIR}/am1; mkdir ${SHARED_DIR}/am1/input; mkdir ${SHARED_DIR}/am1/output
 mkdir ${SHARED_DIR}/bp86; mkdir ${SHARED_DIR}/bp86/input; mkdir ${SHARED_DIR}/bp86/output
 mkdir ${SHARED_DIR}/molekula
