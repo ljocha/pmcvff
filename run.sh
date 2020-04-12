@@ -38,6 +38,8 @@ cleanup() {
 	exit 0
 }
 
+cleanup
+
 #docker run -v /var/run/docker.sock:/var/run/docker.sock \
 #           -v $HOME/${SHARED_DIR}/magicforcefield-pipeline/${SHARED_DIR}:/${SHARED_DIR} \
 #           -e WORK=$HOME/${SHARED_DIR}/magicforcefield-pipeline/${SHARED_DIR} \
