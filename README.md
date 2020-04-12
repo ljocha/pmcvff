@@ -1,6 +1,6 @@
 Run instructions:
 
-Before executing run and build scripts, you need to get all necessary software
+Before executing build scripts, you need to get all necessary software
 which has to be downloaded/set manually:
 
 * Podman: https://podman.io/
@@ -12,6 +12,5 @@ which has to be downloaded/set manually:
 
 
 1. Execute script build.sh which will build the podman image for pipeline
-2. For interactive run and open in jupyter notebook, execute script run.sh with flag -j (./run.sh -j) 
-// For run and open pipeline container, execute script run.sh without flags (./run.sh)
+2. For interactive run and open in jupyter notebook, execute script run.sh
 
