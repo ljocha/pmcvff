@@ -4,9 +4,9 @@ import os
 import socket
 import sys
 
-socket_path = "work/podmand.sock"
-orca = os.environ['HOME'] + "/magicforcefield-pipeline/orca-docker"
-gromacs = os.environ['HOME'] + "/magicforcefield-pipeline/gromacs-plumed-docker/gromacs/gmx-docker"
+socket_path = os.environ['SHARED_DIR'] + "/podmand.sock"
+orca = os.environ['PWD'] + "/orca-docker"
+gromacs = os.environ['PWD'] + "/gromacs-plumed-docker/gromacs/gmx-docker"
 
 server = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
 try:
@@ -32,7 +32,6 @@ while True:
         else:
             conn.send("error choosing between containers".encode('utf-8'))
         conn.send("done".encode('utf-8'))
-		
 
 server.close()
 os.remove(socket_path)
