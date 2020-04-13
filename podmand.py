@@ -24,7 +24,6 @@ while True:
             break
     else:
         parsed_cmd = cmd.split(" ", 3)
-        print(parsed_cmd)
         if parsed_cmd[0] == "gromacs":
             os.system("cd /tmp; " + gromacs + " " + " ".join(parsed_cmd[1:]))
         elif parsed_cmd[0] == "orca":
