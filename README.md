@@ -1,12 +1,11 @@
 Run instructions:
-1.  asd
-2.  asd
-3.  as
 
 1. Clone the pipeline repository
 2. Clone Gromacs repository (https://gitlab.ics.muni.cz/3086/gromacs-plumed-docker) inside magicforcefield-pipeline repository 
 3. Temporary solution: copy gmx-docker from magicforcefield-pipeline directory to gromacs-plumed-docker/gromacs directory
     1. Original solution: Run “make gromacs/gmx-docker” in gromacs-plumed-docker directory
+
+---
 
 1. ssh into zuphux
 2. run screen
@@ -17,6 +16,10 @@ Run instructions:
 Bonus info:
 - you can check output of gromacs in podman_d.log file continually (tail -f podman_d.log)
 - you can check output of each orca method in work/orca_output directory
+
+---
+---
+---
 
 Build instructions:
 
