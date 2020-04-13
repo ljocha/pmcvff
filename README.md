@@ -8,10 +8,11 @@ Run instructions:
 ---
 
 1. ssh into zuphux
-2. run screen
-3. run interactive job ->> qsub -I -l select=[]:ncpus=[]:mem=[]gb:scratch_local=[]gb (tested successfuly on qsub -I -l select=1:ncpus=15:mem=2gb:scratch_local=20gb:cluster=zenon)
+2. Run screen
+3. Run interactive job ->> qsub -I -l select=[]:ncpus=[]:mem=[]gb:scratch_local=[]gb (tested successfuly on qsub -I -l select=1:ncpus=15:mem=2gb:scratch_local=20gb:cluster=zenon)
 4. When the job is ready, due to some server error, you have to log in to logged computer from different terminal window (e.g your job started running on zenon56; open new terminal window and ssh into zenon56, that’s all) otherwise you will get “Error: could not get runtime: mkdir /run/user/6943: permission denied” error
-5. start pipeline script run.sh
+5. Start pipeline script run.sh
+6. Connect to Jupyter notebook via port 8888 (e.g you are connected to zenon56, open browser and type zenon56@cerit-sc.cz:8888)
 
 Bonus info:
 - you can check output of gromacs in podman_d.log file continually (tail -f podman_d.log)
