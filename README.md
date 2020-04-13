@@ -1,4 +1,7 @@
 Run instructions:
+1.  asd
+2.  asd
+3.  as
 
 1. Clone the pipeline repository
 2. Clone Gromacs repository (https://gitlab.ics.muni.cz/3086/gromacs-plumed-docker) inside magicforcefield-pipeline repository 
