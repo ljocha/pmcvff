@@ -31,7 +31,7 @@ else
 fi
 
 ./podman_d.sh &
-cp {tleapin.txt,pipelineJupyter.ipynb} ${SHARED_DIR}
+cp {tleapin.txt,pipelineJupyter.ipynb,molekula.txt} ${SHARED_DIR}
 cd /tmp
 
 
