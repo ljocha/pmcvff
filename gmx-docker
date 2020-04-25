@@ -116,6 +116,8 @@ EOF
 		echo -n "echo ${GROUP:0:1} | gmx " >>/tmp/gmx-podman.$$		
 	elif [ "$1" == 'cluster' ] || [ "$1" == 'energy' ]; then
 		echo -n "(echo ${GROUP:0:1}; sleep 1; echo ${GROUP:0:2}) | gmx " >>/tmp/gmx-podman.$$ 
+	elif [ "$1" == 'driver' ]; then
+		echo -n $MPIRUN plumed >>/tmp/gmx-podman.$$
 	else
 		echo -n $MPIRUN gmx >>/tmp/gmx-podman.$$
 	fi
