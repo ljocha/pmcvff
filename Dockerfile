@@ -7,7 +7,6 @@ ENV TZ=Europe/Prague
 ENV BASE=/home/base
 ENV SHARED_DIR=/work
 
-ARG INTELPYTHON=l_pythoni3_p_2019.5.098.tar.gz
 COPY ${INTELPYTHON} /tmp
 RUN cd /opt && \
     tar xzf /tmp/${INTELPYTHON} && \
