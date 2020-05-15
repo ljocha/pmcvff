@@ -6,7 +6,7 @@ cleanup() {
 	kill -TERM -- -$$
 }
 trap cleanup INT
-source config.sh
+source config
 
 #directory where everything shared between container and host is located
 BASE_DIR="${PWD}/${SHARED_DIR}"
@@ -37,7 +37,7 @@ else
 	echo "working directory \"${SHARED_DIR}\" already created"
 fi
 
-./podman_d.sh &
+./podman_d &
 cp {tleapin.txt,pipelineJupyter.ipynb,molekula.txt} ${SHARED_DIR}
 cd /tmp
 
