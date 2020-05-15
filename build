@@ -1,0 +1,11 @@
+#!/bin/bash
+
+source config
+
+
+if [ "$1" == "-p" ]; then
+	podman --root=${ROOT_TMP} build  -t ${IMAGE_NAME} .
+else
+	docker build -t ${IMAGE_NAME} .
+fi
+
