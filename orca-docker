@@ -35,8 +35,8 @@ VOLUME=${WORKDIR_OUTSIDE}${WORKDIR_CURRENT}:/tmp
 IMAGE="spectraes/pipeline_orca:latest"
 
 if [ -n "$PODMAN" ]; then
-podman="podman --runtime /usr/bin/crun --root=${PWD}"
-podman_run="$podman run --privileged --cgroups disabled --hostname ${HOSTNAME}"
+podman="podman"
+podman_run="$podman run --privileged --hostname ${HOSTNAME}"
 
 cat - >/tmp/orca-podman.$$ <<EOF
 #!/bin/bash

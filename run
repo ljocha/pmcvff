@@ -1,7 +1,7 @@
 #!/bin/bash
 
 cleanup() {
-	podman --root=${ROOT_TMP} rm ${CONTAINER_NAME}
+	podman rm ${CONTAINER_NAME}
 	echo "pipeline container terminated"
 	kill -TERM -- -$$
 }
@@ -35,7 +35,7 @@ fi
 cp {tleapin.txt,pipelineJupyter.ipynb,molekula.txt} ${SHARED_DIR}
 cd /tmp
 
-podman --root ${ROOT_TMP} --runtime /usr/bin/crun run --name ${CONTAINER_NAME} --privileged --cgroups disabled -v ${WORK}:/${SHARED_DIR} -e CPUS=$CPUS -e HOME=/work -p 8888:8888 -ti ${IMAGE_NAME} bash -c "source /opt/intelpython3/bin/activate && jupyter notebook --ip 0.0.0.0 --port 8888 --allow-root"
+podman run --name ${CONTAINER_NAME} --privileged -v ${WORK}:/${SHARED_DIR} -e CPUS=$CPUS -e HOME=/work -p 8888:8888 -ti ${IMAGE_NAME} bash -c "source /opt/intelpython3/bin/activate && jupyter notebook --ip 0.0.0.0 --port 8888 --allow-root"
 
 cleanup
 

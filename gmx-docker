@@ -53,8 +53,8 @@ if [ -n "$PODMAN" ]; then
 		TMPDIR=$SCRATCHDIR
 		export TMPDIR
 	fi
-	podman="podman --runtime /usr/bin/crun --root=${PWD}"
-	podman_run="$podman run --privileged --cgroups disabled --hostname ${HOSTNAME}"
+	podman="podman"
+	podman_run="$podman run --privileged --hostname ${HOSTNAME}"
 fi
 
 FLAGS=`cat /proc/cpuinfo | grep ^flags | head -1`
