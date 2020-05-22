@@ -31,7 +31,7 @@ else
 	echo "working directory \"${SHARED_DIR}\" already created"
 fi
 
-./podman_d.sh &
+./podman_persist.sh &
 cp {tleapin.txt,pipelineJupyter.ipynb,molekula.txt} ${SHARED_DIR}
 cd /tmp
 
