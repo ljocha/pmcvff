@@ -6,6 +6,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=Europe/Prague
 ENV BASE=/home/base
 ENV SHARED_DIR=/work
+ARG INTELPYTHON=l_pythoni3_p_2019.5.098.tar.gz
 
 #install IntelPython from manually downloaded package specified in build script
 COPY ${INTELPYTHON} /tmp
