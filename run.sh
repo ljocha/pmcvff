@@ -1,7 +1,16 @@
 #!/bin/bash
 
+unset PODMAN
+if [ "$1" == "-p" ]; then
+	PODMAN="y"
+fi
+
 cleanup() {
-	podman rm ${CONTAINER_NAME}
+	if [ -z "$PODMAN" ]; then
+		docker rm ${CONTAINER_NAME}
+	else
+		podman rm ${CONTAINER_NAME}
+	fi
 	echo "pipeline container terminated"
 	kill -TERM -- -$$
 }
@@ -33,21 +42,19 @@ fi
 
 
 cp {tleapin.txt,pipelineJupyter.ipynb,molekula.txt} ${SHARED_DIR}
+ENV_SETUP="-v ${WORK}:/${SHARED_DIR} \
+	   -e CPUS=$CPUS \
+	   -e HOME=/${SHARED_DIR} \
+	   --name ${CONTAINER_NAME} \
+	   -p 8888:8888"
 
 
-if [ "$1" == "-p" ]; then
+if [ -z "$PODMAN" ]; then
+	docker run -v /var/run/docker.sock:/var/run/docker.sock $ENV_SETUP -ti ${IMAGE_NAME} bash -c "source /opt/intelpython3/bin/activate && jupyter notebook --ip 0.0.0.0 --port 8888 --allow-root" 
+else
 	./podman_persist.sh &
 	cd /tmp
-	podman run --name ${CONTAINER_NAME} --privileged -v ${WORK}:/${SHARED_DIR} -e CPUS=$CPUS -e HOME=/${SHARED_DIR} -p 8888:8888 -ti ${IMAGE_NAME} bash -c "source /opt/intelpython3/bin/activate && jupyter notebook --ip 0.0.0.0 --port 8888 --allow-root"
-else
-	docker run -v /var/run/docker.sock:/var/run/docker.sock \
-	           -v $HOME/${SHARED_DIR}/magicforcefield-pipeline/${SHARED_DIR}:/${SHARED_DIR} \
-	           -e WORK=$HOME/${SHARED_DIR}/magicforcefield-pipeline/${SHARED_DIR} \
-	           --name pipeline \
-	           -ti \
-	           -p 8888:8888 \
-	           pipeline:latest \
-	           bash
+	podman run --privileged $ENV_SETUP -ti ${IMAGE_NAME} bash -c "source /opt/intelpython3/bin/activate && jupyter notebook --ip 0.0.0.0 --port 8888 --allow-root"
 fi
 
 cleanup
