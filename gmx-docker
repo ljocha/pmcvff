@@ -1,4 +1,5 @@
 #!/bin/bash
+#temporary gmx-docker fix - still in development
 
 IMAGE_BASE=ljocha
 VERSION=:2020.02.06-1
