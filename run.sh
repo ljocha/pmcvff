@@ -31,19 +31,24 @@ else
 	echo "working directory \"${SHARED_DIR}\" already created"
 fi
 
-./podman_persist.sh &
-cp {tleapin.txt,pipelineJupyter.ipynb,molekula.txt} ${SHARED_DIR}
-cd /tmp
 
-podman run --name ${CONTAINER_NAME} --privileged -v ${WORK}:/${SHARED_DIR} -e CPUS=$CPUS -e HOME=/${SHARED_DIR} -p 8888:8888 -ti ${IMAGE_NAME} bash -c "source /opt/intelpython3/bin/activate && jupyter notebook --ip 0.0.0.0 --port 8888 --allow-root"
+cp {tleapin.txt,pipelineJupyter.ipynb,molekula.txt} ${SHARED_DIR}
+
+
+if [ "$1" == "-p" ]; then
+	./podman_persist.sh &
+	cd /tmp
+	podman run --name ${CONTAINER_NAME} --privileged -v ${WORK}:/${SHARED_DIR} -e CPUS=$CPUS -e HOME=/${SHARED_DIR} -p 8888:8888 -ti ${IMAGE_NAME} bash -c "source /opt/intelpython3/bin/activate && jupyter notebook --ip 0.0.0.0 --port 8888 --allow-root"
+else
+	docker run -v /var/run/docker.sock:/var/run/docker.sock \
+	           -v $HOME/${SHARED_DIR}/magicforcefield-pipeline/${SHARED_DIR}:/${SHARED_DIR} \
+	           -e WORK=$HOME/${SHARED_DIR}/magicforcefield-pipeline/${SHARED_DIR} \
+	           --name pipeline \
+	           -ti \
+	           -p 8888:8888 \
+	           pipeline:latest \
+	           bash
+fi
 
 cleanup
 
-#docker run -v /var/run/docker.sock:/var/run/docker.sock \
-#           -v $HOME/${SHARED_DIR}/magicforcefield-pipeline/${SHARED_DIR}:/${SHARED_DIR} \
-#           -e WORK=$HOME/${SHARED_DIR}/magicforcefield-pipeline/${SHARED_DIR} \
-#           --name pipeline \
-#           -ti \
-#           -p 8888:8888 \
-#           pipeline:latest \
-#           bash
