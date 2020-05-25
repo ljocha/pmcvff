@@ -8,14 +8,14 @@ DEFAULT_VERSION=$VERSION
 
 DOUBLE=""
 WORKDIR_CURRENT=""
-GROUP="00"
 
-eval set -- $(getopt -o +pcda:rw:Rv:n:hg: -- "$@")
+eval set -- $(getopt -o +pcda:rw:Rv:n:hi: -- "$@")
 unset MPI
 unset PODMAN
 unset ARCH
 unset RDTSCP
 unset CLEAN
+unset INPUT
 
 while [ $1 != '--' ]; do case $1 in
 	-n) MPI="$2"; shift; shift ;;
@@ -26,7 +26,7 @@ while [ $1 != '--' ]; do case $1 in
 	-w) WORKDIR_CURRENT="$2"; shift; shift ;;
 	-R) RDTSCP=""; shift ;;
 	-v) VERSION=":$2"; shift; shift ;;
-	-g) GROUP="$2"; shift; shift ;;
+	-i) INPUT="$2"; shift; shift ;;
 	-p) PODMAN=y; shift ;;
 	-h) cat >&2 <<EOF
 usage: $0 options [--] gromacs_args ...
@@ -40,7 +40,7 @@ options are:
 	-R		disable RDTSCP
 	-c		cleanup -- just remove docker image 
 	-p		use podman instead of docker
-	-g		specify trjconv,cluster,energy group (00 if not specified)
+	-i		specify input for gromacs
 	-v version	use specific docker image version ($DEFAULT_VERSION by default)
 EOF
 	exit 1;;
@@ -105,6 +105,16 @@ fi
 IMAGE=${IMAGE_BASE}/gromacs_${ARCH}${RDTSCP}${DOUBLE}${VERSION} 
 VOLUME=${WORKDIR_OUTSIDE}${WORKDIR_CURRENT}:/tmp
 
+if [ -n "$INPUT" ]; then
+	gmx_input=""
+	for (( i=0; i<${#INPUT}; i++ )); do
+		gmx_input="$gmx_input echo ${INPUT:$i:1}"
+		if [ $((i+1)) != ${#INPUT} ]; then
+			gmx_input="$gmx_input; sleep 1; "
+		fi
+	done
+fi
+
 if [ -n "$PODMAN" ]; then
 	cat - >/tmp/gmx-podman.$$ <<EOF
 #!/bin/bash
@@ -113,14 +123,10 @@ cp /host/usr/lib/nvidia/current/nvidia-smi /usr/bin
 cp -rP /host/usr/lib/x86_64-linux-gnu/nvidia/current/* /usr/lib/x86_64-linux-gnu
 cp -rP /host/usr/lib/mesa-diverted/x86_64-linux-gnu/* /usr/lib/x86_64-linux-gnu
 EOF
-	if [ "$1" == 'trjconv' ]; then
-		echo -n "echo ${GROUP:0:1} | gmx " >>/tmp/gmx-podman.$$		
-	elif [ "$1" == 'cluster' ] || [ "$1" == 'energy' ]; then
-		echo -n "(echo ${GROUP:0:1}; sleep 1; echo ${GROUP:0:2}) | gmx " >>/tmp/gmx-podman.$$ 
-	elif [ "$1" == 'driver' ]; then
+	if [ "$1" == 'driver' ]; then
 		echo -n $MPIRUN plumed >>/tmp/gmx-podman.$$
 	else
-		echo -n $MPIRUN gmx >>/tmp/gmx-podman.$$
+		echo -n "($gmx_input) | $MPIRUN gmx " >>/tmp/gmx-podman.$$
 	fi
 	for a in "$@"; do
 		echo -n " "\"$a\" >>/tmp/gmx-podman.$$
