@@ -24,6 +24,7 @@ RUN bash -c "source /opt/intelpython3/bin/activate && conda install -y --freeze-
 RUN bash -c "source /opt/intelpython3/bin/activate && jupyter-nbextension enable nglview --py --sys-prefix"
 RUN bash -c "source /opt/intelpython3/bin/activate && conda install -y pandas"
 RUN bash -c "source /opt/intelpython3/bin/activate && conda install -y -c rmg py3dmol"
+RUN bash -c "source /opt/intelpython3/bin/activate && conda install -y -c conda-forge tqdm"
 
 #install openbabel, amber, molvs
 RUN bash -c "source /opt/intelpython3/bin/activate && conda install -y -c openbabel openbabel"
