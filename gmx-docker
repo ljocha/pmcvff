@@ -126,7 +126,7 @@ EOF
 	if [ "$1" == 'driver' ]; then
 		echo -n $MPIRUN plumed >>/tmp/gmx-podman.$$
 	else
-		echo -n "($gmx_input) | $MPIRUN gmx " >>/tmp/gmx-podman.$$
+		echo -n "\($gmx_input\) | $MPIRUN gmx " >>/tmp/gmx-podman.$$
 	fi
 	for a in "$@"; do
 		echo -n " "\"$a\" >>/tmp/gmx-podman.$$
