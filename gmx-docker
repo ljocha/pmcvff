@@ -9,13 +9,14 @@ DEFAULT_VERSION=$VERSION
 DOUBLE=""
 WORKDIR_CURRENT=""
 
-eval set -- $(getopt -o +pcda:rw:Rv:n:hi: -- "$@")
+eval set -- $(getopt -o +pcda:rw:Rv:n:hi:m: -- "$@")
 unset MPI
 unset PODMAN
 unset ARCH
 unset RDTSCP
 unset CLEAN
 unset INPUT
+unset MULTI_INPUT
 
 while [ $1 != '--' ]; do case $1 in
 	-n) MPI="$2"; shift; shift ;;
@@ -27,6 +28,7 @@ while [ $1 != '--' ]; do case $1 in
 	-R) RDTSCP=""; shift ;;
 	-v) VERSION=":$2"; shift; shift ;;
 	-i) INPUT="$2"; shift; shift ;;
+	-m) MULTI_INPUT="$2"; shift; shift ;;
 	-p) PODMAN=y; shift ;;
 	-h) cat >&2 <<EOF
 usage: $0 options [--] gromacs_args ...
@@ -41,6 +43,7 @@ options are:
 	-c		cleanup -- just remove docker image 
 	-p		use podman instead of docker
 	-i		specify input for gromacs
+	-m		specify string input for gromacs
 	-v version	use specific docker image version ($DEFAULT_VERSION by default)
 EOF
 	exit 1;;
@@ -105,14 +108,32 @@ fi
 IMAGE=${IMAGE_BASE}/gromacs_${ARCH}${RDTSCP}${DOUBLE}${VERSION} 
 VOLUME=${WORKDIR_OUTSIDE}${WORKDIR_CURRENT}:/tmp
 
+gmx_input=""
 if [ -n "$INPUT" ]; then
-	gmx_input=""
 	for (( i=0; i<${#INPUT}; i++ )); do
 		gmx_input="$gmx_input echo ${INPUT:$i:1}"
 		if [ $((i+1)) != ${#INPUT} ]; then
 			gmx_input="$gmx_input; sleep 1; "
 		fi
 	done
+fi
+
+echo "$MULTI_INPUT"
+
+if [ -n "$MULTI_INPUT" ]; then
+	echo ISANDIDANSDIADNIWNIDNQIDOQNWODNQOWIDNOQW---------------------
+	gmx_input_tmp=''
+	for (( i=0; i<${#MULTI_INPUT}; i++ )); do
+		echo "${MULTI_INPUT:$i:1}"
+		if [ "${MULTI_INPUT:$i:1}" != "_" ]; then
+			gmx_input_tmp="$gmx_input_tmp${MULTI_INPUT:$i:1}"
+			if [ $((i+1)) != ${#MULTI_INPUT} ]; then
+				continue
+			fi
+		fi
+                gmx_input="$gmx_input echo '$gmx_input_tmp'; sleep 1; "
+		gmx_input_tmp=""
+        done
 fi
 
 if [ -n "$PODMAN" ]; then
@@ -125,8 +146,10 @@ cp -rP /host/usr/lib/mesa-diverted/x86_64-linux-gnu/* /usr/lib/x86_64-linux-gnu
 EOF
 	if [ "$1" == 'driver' ]; then
 		echo -n $MPIRUN plumed >>/tmp/gmx-podman.$$
+	elif [ -n "$gmx_input" ]; then
+		echo -n "($gmx_input) | $MPIRUN gmx " >>/tmp/gmx-podman.$$
 	else
-		echo -n "\($gmx_input\) | $MPIRUN gmx " >>/tmp/gmx-podman.$$
+		echo -n "$MPIRUN gmx " >>/tmp/gmx-podman.$$
 	fi
 	for a in "$@"; do
 		echo -n " "\"$a\" >>/tmp/gmx-podman.$$
@@ -136,6 +159,7 @@ EOF
 	chmod +x /tmp/gmx-podman.$$
 
 	$podman_run -v /:/host -v $VOLUME -ti  $IMAGE /host/tmp/gmx-podman.$$
+	cat /tmp/gmx-podman.$$
 	rm /tmp/gmx-podman.$$
 
 else
