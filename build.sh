@@ -11,7 +11,7 @@ fi
 
 
 if [ "$1" == "-p" ]; then
-	podman build --build-arg INTELPYTHON=${INTELPYTHON} -t ${IMAGE_NAME} .
+	podman build --build-arg INTELPYTHON=${INTELPYTHON} --build-arg work=${WORK} -t ${IMAGE_NAME} .
 else
 	docker build -t ${IMAGE_NAME} .
 fi

@@ -2,11 +2,14 @@ FROM ubuntu:18.04
 
 USER root
 
+#set variables
+ARG INTELPYTHON
+ARG work 
+ENV WORK=$work
 ENV DEBIAN_FRONTEND=noninteractive 
 ENV TZ=Europe/Prague
 ENV BASE=/home/base
 ENV SHARED_DIR=/work
-ARG INTELPYTHON
 
 #install IntelPython from manually downloaded package specified in build script
 COPY ${INTELPYTHON} /tmp
@@ -42,7 +45,7 @@ RUN bash -c "source /opt/intelpython3/bin/activate && conda install -y -c conda-
 
 #install other tools
 RUN bash -c "apt-get install xz-utils"
-#RUN apt-get update && apt install -y docker.io
+RUN apt-get update && apt install -y docker.io
 
 #copy all necessary files to run force field correction evaluation
 COPY modules ${BASE}/modules/
