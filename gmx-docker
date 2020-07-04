@@ -164,12 +164,12 @@ EOF
 
 else
 # XXX: always grab all gpus
-	if [ $(docker -v | sed 's/Docker version //; s/\..*$//;') -ge 19 ]; then
-		gpu="--gpus all --device /dev/nvidiactl:/dev/nvidiactl --device /dev/nvidia-uvm:/dev/nvidia-uvm"
-		for d in /dev/nvidia[0-9]*; do
-			gpu="$gpu --device $d:$d"
-		done
-	fi
+	#if [ $(docker -v | sed 's/Docker version //; s/\..*$//;') -ge 19 ]; then
+	#	gpu="--gpus all --device /dev/nvidiactl:/dev/nvidiactl --device /dev/nvidia-uvm:/dev/nvidia-uvm"
+	#	for d in /dev/nvidia[0-9]*; do
+	#		gpu="$gpu --device $d:$d"
+	#	done
+	#fi
 
 	if [ -n "$CLEAN" ]; then
 		docker rmi --force ${IMAGE}

@@ -4,8 +4,6 @@ USER root
 
 #set variables
 ARG INTELPYTHON
-ARG work 
-ENV WORK=$work
 ENV DEBIAN_FRONTEND=noninteractive 
 ENV TZ=Europe/Prague
 ENV BASE=/home/base
