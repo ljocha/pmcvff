@@ -4,8 +4,6 @@ USER root
 
 #set variables
 ARG INTELPYTHON
-ARG work 
-ENV WORK=$work
 ENV DEBIAN_FRONTEND=noninteractive 
 ENV TZ=Europe/Prague
 ENV BASE=/home/base
@@ -20,9 +18,10 @@ RUN cd /opt && \
     echo source /opt/intelpython3/bin/activate  >>/etc/bash.bashrc && rm /tmp/${INTELPYTHON}
 
 #install jupyter, python tools and widgets used for visualisation
+RUN bash -c "source /opt/intelpython3/bin/activate && conda install -y ruamel_yaml"
 RUN bash -c "source /opt/intelpython3/bin/activate && conda install -y -c conda-forge jupyter"
 RUN bash -c "source /opt/intelpython3/bin/activate && conda install -y -n base -c conda-forge widgetsnbextension"
-RUN bash -c "source /opt/intelpython3/bin/activate && conda install -c conda-forge ipywidgets"
+RUN bash -c "source /opt/intelpython3/bin/activate && conda install -y -c conda-forge ipywidgets"
 RUN bash -c "source /opt/intelpython3/bin/activate && conda install -y --freeze-installed -c conda-forge pypdb pydoe mdtraj nglview"
 RUN bash -c "source /opt/intelpython3/bin/activate && jupyter-nbextension enable nglview --py --sys-prefix"
 RUN bash -c "source /opt/intelpython3/bin/activate && conda install -y pandas"
@@ -49,7 +48,7 @@ RUN apt-get update && apt install -y docker.io
 
 #copy all necessary files to run force field correction evaluation
 COPY modules ${BASE}/modules/
-COPY podman-run.py /opt/
+COPY gmx-docker orca-docker podman-run.py /opt/
 COPY molekula.txt tleapin.txt pipelineJupyter.ipynb ${BASE}/
 
 WORKDIR ${SHARED_DIR}
