@@ -28,7 +28,7 @@ while [ $1 != '--' ]; do case $1 in
 	-R) RDTSCP=""; shift ;;
 	-v) VERSION=":$2"; shift; shift ;;
 	-i) INPUT="$2"; shift; shift ;;
-	-m) MULTI_INPUT="$2"; shift; shift ;;
+	-m) MULTI_INPUT="'$2'"; shift; shift ;;
 	-p) PODMAN=y; shift ;;
 	-h) cat >&2 <<EOF
 usage: $0 options [--] gromacs_args ...
@@ -118,20 +118,16 @@ if [ -n "$INPUT" ]; then
 	done
 fi
 
-echo "$MULTI_INPUT"
-
 if [ -n "$MULTI_INPUT" ]; then
-	echo ISANDIDANSDIADNIWNIDNQIDOQNWODNQOWIDNOQW---------------------
 	gmx_input_tmp=''
 	for (( i=0; i<${#MULTI_INPUT}; i++ )); do
-		echo "${MULTI_INPUT:$i:1}"
 		if [ "${MULTI_INPUT:$i:1}" != "_" ]; then
 			gmx_input_tmp="$gmx_input_tmp${MULTI_INPUT:$i:1}"
 			if [ $((i+1)) != ${#MULTI_INPUT} ]; then
 				continue
 			fi
 		fi
-                gmx_input="$gmx_input echo '$gmx_input_tmp'; sleep 1; "
+		gmx_input="$gmx_input echo '$gmx_input_tmp'; sleep 1; "
 		gmx_input_tmp=""
         done
 fi
@@ -171,15 +167,17 @@ else
 #		done
 #	fi
 
+	docker_run="docker run $gpu -u $(id -u):$(id -g) -i -v $VOLUME ${IMAGE} $MPIRUN"
+
 	if [ -n "$CLEAN" ]; then
 		docker rmi --force ${IMAGE}
 	else
 		if [ "$1" == 'driver' ]; then
-			#echo -n $MPIRUN plumed >>/tmp/gmx-podman.$$
+		    $docker_run plumed "$@"
 		elif [ -n "$gmx_input" ]; then
-			($gmx_input) | docker run $gpu -u $(id -u):$(id -g) -i -v $VOLUME ${IMAGE} $MPIRUN gmx "$@"
+			($gmx_input) | $docker_run gmx "$@"
 		else
-			docker run $gpu -u $(id -u):$(id -g) -i -v $VOLUME ${IMAGE} $MPIRUN gmx "$@"
+			$docker_run gmx "$@"
 		fi
 
 	fi
