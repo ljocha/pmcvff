@@ -48,7 +48,7 @@ RUN apt-get update && apt install -y docker.io
 
 #copy all necessary files to run force field correction evaluation
 COPY modules ${BASE}/modules/
-COPY gmx-docker orca-docker podman-run.py /opt/
+COPY ./gromacs-plumed-docker/gromacs/gmx-docker orca-docker podman-run.py /opt/
 COPY molekula.txt tleapin.txt pipelineJupyter.ipynb ${BASE}/
 
 WORKDIR ${SHARED_DIR}
