@@ -45,6 +45,7 @@ cp {tleapin.txt,pipelineJupyter.ipynb,molekula.txt} ${SHARED_DIR}
 ENV_SETUP="-v ${WORK}:/${SHARED_DIR} \
 	   -e CPUS=$CPUS \
 	   -e HOME=/${SHARED_DIR} \
+	   -e WORK=$WORK \
 	   --name ${CONTAINER_NAME} \
 	   -p 8888:8888"
 
