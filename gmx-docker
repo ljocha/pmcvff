@@ -28,7 +28,7 @@ while [ $1 != '--' ]; do case $1 in
 	-R) RDTSCP=""; shift ;;
 	-v) VERSION=":$2"; shift; shift ;;
 	-i) INPUT="$2"; shift; shift ;;
-	-m) MULTI_INPUT="'$2'"; shift; shift ;;
+	-m) MULTI_INPUT="$2"; shift; shift ;;
 	-p) PODMAN=y; shift ;;
 	-h) cat >&2 <<EOF
 usage: $0 options [--] gromacs_args ...
