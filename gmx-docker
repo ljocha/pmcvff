@@ -127,9 +127,10 @@ if [ -n "$MULTI_INPUT" ]; then
 				continue
 			fi
 		fi
-		gmx_input="$gmx_input echo '$gmx_input_tmp'; sleep 1; "
+		gmx_input="$gmx_input echo \"$gmx_input_tmp\"; sleep 2; "
 		gmx_input_tmp=""
         done
+	gmx_input="($gmx_input)"
 fi
 
 if [ -n "$PODMAN" ]; then
@@ -143,7 +144,7 @@ EOF
 	if [ "$1" == 'driver' ]; then
 		echo -n $MPIRUN plumed >>/tmp/gmx-podman.$$
 	elif [ -n "$gmx_input" ]; then
-		echo -n "($gmx_input) | $MPIRUN gmx " >>/tmp/gmx-podman.$$
+		echo -n "$gmx_input | $MPIRUN gmx " >>/tmp/gmx-podman.$$
 	else
 		echo -n "$MPIRUN gmx " >>/tmp/gmx-podman.$$
 	fi
@@ -155,7 +156,6 @@ EOF
 	chmod +x /tmp/gmx-podman.$$
 
 	$podman_run -v /:/host -v $VOLUME -ti  $IMAGE /host/tmp/gmx-podman.$$
-	cat /tmp/gmx-podman.$$
 	rm /tmp/gmx-podman.$$
 
 else
@@ -175,7 +175,8 @@ else
 		if [ "$1" == 'driver' ]; then
 		    $docker_run plumed "$@"
 		elif [ -n "$gmx_input" ]; then
-			($gmx_input) | $docker_run gmx "$@"
+			cmd="$gmx_input | $docker_run gmx $@"
+			sh -c "$cmd"
 		else
 			$docker_run gmx "$@"
 		fi
