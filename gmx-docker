@@ -119,18 +119,21 @@ if [ -n "$INPUT" ]; then
 fi
 
 if [ -n "$MULTI_INPUT" ]; then
+	start_index=0
+	if [ -z "$PODMAN" ]; then
+		start_index=1
+	fi
 	gmx_input_tmp=''
-	for (( i=0; i<${#MULTI_INPUT}; i++ )); do
-		if [ "${MULTI_INPUT:$i:1}" != "_" ]; then
+	for (( i=$start_index; i<${#MULTI_INPUT}; i++ )); do
+		if [ "${MULTI_INPUT:$i:1}" != "_" ] && [ "${MULTI_INPUT:$i:1}" != '"' ]; then
 			gmx_input_tmp="$gmx_input_tmp${MULTI_INPUT:$i:1}"
 			if [ $((i+1)) != ${#MULTI_INPUT} ]; then
 				continue
 			fi
 		fi
-		gmx_input="$gmx_input echo \"$gmx_input_tmp\"; sleep 2; "
+                gmx_input="$gmx_input echo '$gmx_input_tmp'; sleep 1; "
 		gmx_input_tmp=""
         done
-	gmx_input="($gmx_input)"
 fi
 
 if [ -n "$PODMAN" ]; then
@@ -144,7 +147,7 @@ EOF
 	if [ "$1" == 'driver' ]; then
 		echo -n $MPIRUN plumed >>/tmp/gmx-podman.$$
 	elif [ -n "$gmx_input" ]; then
-		echo -n "$gmx_input | $MPIRUN gmx " >>/tmp/gmx-podman.$$
+		echo -n "($gmx_input) | $MPIRUN gmx " >>/tmp/gmx-podman.$$
 	else
 		echo -n "$MPIRUN gmx " >>/tmp/gmx-podman.$$
 	fi
@@ -154,6 +157,7 @@ EOF
 	echo >>/tmp/gmx-podman.$$
 
 	chmod +x /tmp/gmx-podman.$$
+	cat /tmp/gmx-podman.$$
 
 	$podman_run -v /:/host -v $VOLUME -ti  $IMAGE /host/tmp/gmx-podman.$$
 	rm /tmp/gmx-podman.$$
@@ -167,15 +171,15 @@ else
 #		done
 #	fi
 
-	docker_run="docker run $gpu -u $(id -u):$(id -g) -i -v $VOLUME ${IMAGE} $MPIRUN"
-
+	docker_run="docker run $gpu -u $(id -u):$(stat -c %g /var/run/docker.sock) -i -v $VOLUME ${IMAGE} $MPIRUN"
+	
 	if [ -n "$CLEAN" ]; then
 		docker rmi --force ${IMAGE}
 	else
 		if [ "$1" == 'driver' ]; then
 		    $docker_run plumed "$@"
 		elif [ -n "$gmx_input" ]; then
-			cmd="$gmx_input | $docker_run gmx $@"
+			cmd="($gmx_input) | $docker_run gmx $@"
 			sh -c "$cmd"
 		else
 			$docker_run gmx "$@"

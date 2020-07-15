@@ -51,7 +51,8 @@ ENV_SETUP="-v ${WORK}:/${SHARED_DIR} \
 
 
 if [ -z "$PODMAN" ]; then
-	docker run -v /var/run/docker.sock:/var/run/docker.sock $ENV_SETUP -ti ${IMAGE_NAME} bash -c "source /opt/intelpython3/bin/activate && jupyter notebook --ip 0.0.0.0 --port 8888 --allow-root" 
+	gid=$(stat -c %g /var/run/docker.sock)
+	docker run -u $(id -u):$gid -v /var/run/docker.sock:/var/run/docker.sock $ENV_SETUP -ti ${IMAGE_NAME} bash -c "source /opt/intelpython3/bin/activate && jupyter notebook --ip 0.0.0.0 --port 8888 --allow-root" 
 else
 	./podman_persist.sh &
 	cd /tmp
