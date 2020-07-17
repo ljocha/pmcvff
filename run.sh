@@ -28,14 +28,6 @@ echo "running with ${CPUS} cpu's"
 #create directories for pipeline temporary results 
 if [ ! -d "$SHARED_DIR" ]; then
 	mkdir ${SHARED_DIR}
-	mkdir ${SHARED_DIR}/orca_output; mkdir ${SHARED_DIR}/orca_output/am1; mkdir ${SHARED_DIR}/orca_output/bp86
-	mkdir ${SHARED_DIR}/am1; mkdir ${SHARED_DIR}/am1/input; mkdir ${SHARED_DIR}/am1/output
-	mkdir ${SHARED_DIR}/bp86; mkdir ${SHARED_DIR}/bp86/input; mkdir ${SHARED_DIR}/bp86/output
-	mkdir ${SHARED_DIR}/molekula
-	mkdir ${SHARED_DIR}/clustering
-	mkdir ${SHARED_DIR}/clustering/outClustersPDB
-	mkdir ${SHARED_DIR}/clustering/outClustersXYZ
-	mkdir ${SHARED_DIR}/clustering/orcaClusters
 else
 	echo "working directory \"${SHARED_DIR}\" already created"
 fi
