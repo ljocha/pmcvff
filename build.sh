@@ -9,10 +9,11 @@ if [ ! -f "$INTELPYTHON" ]; then
 	exit 1
 fi
 
+build_setup="--build-arg INTELPYTHON=${INTELPYTHON} -t ${IMAGE_NAME}"
 
 if [ "$1" == "-p" ]; then
-	podman build --build-arg INTELPYTHON=${INTELPYTHON} -t ${IMAGE_NAME} .
+	podman build $build_setup .
 else
-	docker build -t ${IMAGE_NAME} .
+	docker build $build_setup .
 fi
 

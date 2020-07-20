@@ -28,35 +28,30 @@ echo "running with ${CPUS} cpu's"
 #create directories for pipeline temporary results 
 if [ ! -d "$SHARED_DIR" ]; then
 	mkdir ${SHARED_DIR}
-	mkdir ${SHARED_DIR}/orca_output; mkdir ${SHARED_DIR}/orca_output/am1; mkdir ${SHARED_DIR}/orca_output/bp86
-	mkdir ${SHARED_DIR}/am1; mkdir ${SHARED_DIR}/am1/input; mkdir ${SHARED_DIR}/am1/output
-	mkdir ${SHARED_DIR}/bp86; mkdir ${SHARED_DIR}/bp86/input; mkdir ${SHARED_DIR}/bp86/output
-	mkdir ${SHARED_DIR}/molekula
-	mkdir ${SHARED_DIR}/clustering
-	mkdir ${SHARED_DIR}/clustering/outClustersPDB
-	mkdir ${SHARED_DIR}/clustering/outClustersXYZ
-	mkdir ${SHARED_DIR}/clustering/orcaClusters
 else
 	echo "working directory \"${SHARED_DIR}\" already created"
 fi
 
 
 cp {tleapin.txt,pipelineJupyter.ipynb,molekula.txt} ${SHARED_DIR}
-ENV_SETUP="-v ${WORK}:/${SHARED_DIR} \
+env_setup="-v ${WORK}:/${SHARED_DIR} \
 	   -e CPUS=$CPUS \
 	   -e HOME=/${SHARED_DIR} \
 	   -e WORK=$WORK \
 	   --name ${CONTAINER_NAME} \
 	   -p 8888:8888"
 
+jupyter_run="source /opt/intelpython3/bin/activate && jupyter notebook --ip 0.0.0.0 --port 8888 --allow-root"
+
 
 if [ -z "$PODMAN" ]; then
+	chmod -R o+rx $PWD/$SHARED_DIR
 	gid=$(stat -c %g /var/run/docker.sock)
-	docker run -u $(id -u):$gid -v /var/run/docker.sock:/var/run/docker.sock $ENV_SETUP -ti ${IMAGE_NAME} bash -c "source /opt/intelpython3/bin/activate && jupyter notebook --ip 0.0.0.0 --port 8888 --allow-root" 
+	docker run -u $(id -u):$gid -v /var/run/docker.sock:/var/run/docker.sock $env_setup -ti ${IMAGE_NAME} bash -c "$jupyter_run" 
 else
 	./podman_persist.sh &
 	cd /tmp
-	podman run --privileged $ENV_SETUP -ti ${IMAGE_NAME} bash -c "source /opt/intelpython3/bin/activate && jupyter notebook --ip 0.0.0.0 --port 8888 --allow-root"
+	podman run --privileged $env_setup -ti ${IMAGE_NAME} bash -c "source /opt/intelpython3/bin/activate && jupyter notebook --ip 0.0.0.0 --port 8888 --allow-root"
 fi
 
 cleanup
