@@ -157,21 +157,20 @@ EOF
 	echo >>/tmp/gmx-podman.$$
 
 	chmod +x /tmp/gmx-podman.$$
-	cat /tmp/gmx-podman.$$
 
 	$podman_run -v /:/host -v $VOLUME -ti  $IMAGE /host/tmp/gmx-podman.$$
 	rm /tmp/gmx-podman.$$
 
 else
 # XXX: always grab all gpus
-#	if [ $(docker -v | sed 's/Docker version //; s/\..*$//;') -ge 19 ]; then
-#		gpu="--gpus all --device /dev/nvidiactl:/dev/nvidiactl --device /dev/nvidia-uvm:/dev/nvidia-uvm"
-#		for d in /dev/nvidia[0-9]*; do
-#			gpu="$gpu --device $d:$d"
-#		done
-#	fi
+	if [ $(docker -v | sed 's/Docker version //; s/\..*$//;') -ge 19 ]; then
+		gpu="--gpus all --device /dev/nvidiactl:/dev/nvidiactl --device /dev/nvidia-uvm:/dev/nvidia-uvm"
+		for d in $(ls /dev | egrep -i 'nvidia[0..9]*'); do
+			gpu="$gpu --device $d:$d"
+		done
+	fi
 
-	docker_run="docker run $gpu -u $(id -u):$(stat -c %g /var/run/docker.sock) -i -v $VOLUME ${IMAGE} $MPIRUN"
+	docker_run="docker run -e CUDA_VISIBLE_DEVICES -e CUDA_DEVICE_ORDER $gpu -u $(id -u):$(stat -c %g /var/run/docker.sock) -i -v $VOLUME ${IMAGE} $MPIRUN"
 	
 	if [ -n "$CLEAN" ]; then
 		docker rmi --force ${IMAGE}

@@ -43,8 +43,14 @@ RUN bash -c "source /opt/intelpython3/bin/activate && conda install -y -c conda-
 RUN bash -c "source /opt/intelpython3/bin/activate && conda install -y -c conda-forge pillow"
 
 #install other tools
-RUN bash -c "apt-get install xz-utils"
-RUN apt-get update && apt install -y docker.io
+ARG distribution=ubuntu18.04
+RUN bash -c "apt-get install -y xz-utils curl gnupg"
+RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
+RUN echo "deb [arch=amd64] https://download.docker.com/linux/ubuntu bionic stable" >>/etc/apt/sources.list
+RUN curl -s -L https://nvidia.github.io/nvidia-docker/gpgkey | apt-key add -
+RUN curl -s -L -o /etc/apt/sources.list.d/nvidia-docker.list https://nvidia.github.io/nvidia-docker/$distribution/nvidia-docker.list 
+RUN apt update && apt install -y docker-ce-cli nvidia-container-toolkit
+#-y docker.io nvidia-container-toolkit
 
 #copy all necessary files to run force field correction evaluation
 COPY modules ${BASE}/modules/
