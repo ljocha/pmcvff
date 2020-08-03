@@ -45,7 +45,7 @@ jupyter_run="source /opt/intelpython3/bin/activate && jupyter notebook --ip 0.0.
 
 
 if [ -z "$PODMAN" ]; then
-	chmod -R o+rx $PWD/$SHARED_DIR
+	./add_permissions.sh $PWD/$SHARED_DIR
 	gid=$(stat -c %g /var/run/docker.sock)
 	docker run -u $(id -u):$gid -v /var/run/docker.sock:/var/run/docker.sock $env_setup -ti ${IMAGE_NAME} bash -c "$jupyter_run" 
 else
