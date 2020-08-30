@@ -1,20 +1,22 @@
 #!/bin/bash
 
-eval set -- $(getopt -o +w:hpo: -- "$@")
+eval set -- $(getopt -o +w:hpl: -- "$@")
 unset PODMAN
 unset OUTPUT_LOG
+unset WORKDIR_OUTSIDE
 
 while [ $1 != '--' ]; do case $1 in
 	-w) WORKDIR_CURRENT="$2"; shift ; shift ;;
 	-p) PODMAN="y"; shift ;;
-	-o) OUTPUT_LOG="$2"; shift ; shift ;;
+	-l) OUTPUT_LOG="$2"; shift ; shift ;;
     	-h) cat >&2 <<EOF
 usage: $0 options [--] orca_args ...
 
 options are:
-        	-w      directory relative to outside work directory for orca evaluation
+        	-w      	directory relative to outside work directory for orca evaluation
 		-p		use podman instead of docker
-		-o		specify output log file for orca output
+		-m		specify method for .log file saving
+		-l		specify output log file for orca output relative to outside work directory
 EOF
         exit 1;;
         --) shift; break ;;
@@ -35,6 +37,7 @@ fi
 
 VOLUME=${WORKDIR_OUTSIDE}${WORKDIR_CURRENT}:/tmp
 IMAGE="spectraes/pipeline_orca:latest"
+output_log=${WORKDIR_OUTSIDE}${OUTPUT_LOG}
 
 if [ -n "$PODMAN" ]; then
 podman="podman"
@@ -52,12 +55,12 @@ EOF
 
 	chmod +x /tmp/orca-podman.$$
 	cat /tmp/orca-podman.$$
-
-	$podman_run -v /:/host -v $VOLUME -ti $IMAGE /host/tmp/orca-podman.$$ > $OUTPUT_LOG
+	
+	$podman_run -v /:/host -v $VOLUME -ti $IMAGE /host/tmp/orca-podman.$$ > $output_log
 
 	rm /tmp/orca-podman.$$
 else
-	cmd="docker run -v /:/host -v $VOLUME -ti $IMAGE bash -c \"/opt/orca/orca $@ > $OUTPUT_LOG\""
+	cmd="docker run -v /:/host -v $VOLUME -ti $IMAGE bash -c \"/opt/orca/orca $@ > $output_log\""
 	sh -c "$cmd"
 fi
 
