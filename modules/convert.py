@@ -1,7 +1,7 @@
 import os
 
 
-def convert_to_orca_methods(input_path, output_path, torsions, method_desc, nprocs):
+def convert_to_orca_methods(input_path, output_path, torsions, method_desc, nprocs, charge):
     for xyz_cluster in os.listdir(input_path):
         if (not xyz_cluster.endswith(".xyz")) or (xyz_cluster.endswith("trj.xyz")):
             continue
@@ -18,7 +18,7 @@ def convert_to_orca_methods(input_path, output_path, torsions, method_desc, npro
         output_file.write("end" + os.linesep)
         output_file.write(os.linesep)
 
-        output_file.write("* xyz 1 1" + os.linesep)
+        output_file.write("* xyz {} {}".format(charge[0], charge[1]) + os.linesep)
         copy_xyz_to_orca(input_path + xyz_cluster, output_file)
         output_file.write("*" + os.linesep)
 
