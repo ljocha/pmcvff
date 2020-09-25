@@ -33,7 +33,7 @@ else
 fi
 
 
-cp {tleapin.txt,pipelineJupyter.ipynb,molekula.txt} ${SHARED_DIR}
+cp {tleapin.txt,pipelineJupyter.ipynb} ${SHARED_DIR}
 env_setup="-v ${WORK}:/${SHARED_DIR} \
 	   -e CPUS=$CPUS \
 	   -e HOME=/${SHARED_DIR} \
@@ -52,4 +52,3 @@ else
 fi
 
 cleanup
-
