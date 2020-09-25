@@ -41,17 +41,14 @@ env_setup="-v ${WORK}:/${SHARED_DIR} \
 	   --name ${CONTAINER_NAME} \
 	   -p 8888:8888"
 
-jupyter_run="source /opt/intelpython3/bin/activate && jupyter notebook --ip 0.0.0.0 --port 8888 --allow-root"
-
-
 if [ -z "$PODMAN" ]; then
 	./add_permissions.sh $PWD/$SHARED_DIR
 	gid=$(stat -c %g /var/run/docker.sock)
-	docker run -u $(id -u):$gid -v /var/run/docker.sock:/var/run/docker.sock $env_setup -ti ${IMAGE_NAME} bash -c "$jupyter_run" 
+	docker run -u $(id -u):$gid -v /var/run/docker.sock:/var/run/docker.sock $env_setup -ti $IMAGE_NAME 
 else
 	./podman_persist.sh &
 	cd /tmp
-	podman run --privileged $env_setup -ti ${IMAGE_NAME} bash -c "source /opt/intelpython3/bin/activate && jupyter notebook --ip 0.0.0.0 --port 8888 --allow-root"
+	podman run --privileged $env_setup -ti $IMAGE_NAME
 fi
 
 cleanup
