@@ -7,7 +7,7 @@ ARG INTELPYTHON
 ENV DEBIAN_FRONTEND=noninteractive 
 ENV TZ=Europe/Prague
 ENV BASE=/home/base
-ENV WORK=/work
+ENV SHARED_DIR=/work
 
 #install IntelPython from manually downloaded package specified in build script
 COPY ${INTELPYTHON} /tmp
@@ -50,8 +50,8 @@ RUN bash -c "source /opt/intelpython3/bin/activate && cd /opt/parmtSNEcv && pip 
 
 #install kubectl
 RUN bash -c "apt-get update && apt-get install -y apt-transport-https gnupg2 curl xz-utils"
-RUN bash -c "curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -"
-RUN bash -c "echo 'deb https://apt.kubernetes.io/ kubernetes-xenial main' | sudo tee -a /etc/apt/sources.list.d/kubernetes.list"
+RUN bash -c "curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -"
+RUN bash -c "echo 'deb https://apt.kubernetes.io/ kubernetes-xenial main' | tee -a /etc/apt/sources.list.d/kubernetes.list"
 RUN bash -c "apt-get update && apt-get install -y kubectl"
 
 #install other tools
@@ -65,10 +65,10 @@ RUN apt update && apt install -y docker-ce-cli nvidia-container-toolkit
 #copy all necessary files to run force field correction evaluation
 COPY modules ${BASE}/modules/
 COPY ./gromacs-plumed-docker/gromacs/gmx-docker orca-docker podman-run.py /opt/
-COPY tleapin.txt ${WORK}/
+COPY tleapin.txt ${SHARED_DIR}/
 
-WORKDIR ${WORK}
+WORKDIR ${SHARED_DIR}
 EXPOSE 8888
 
 #run Jupyter Notebook when container is executed
-CMD bash -c "sleep 2 && cd $WORK && curl -LO https://gitlab.ics.muni.cz/467814/magicforcefield-pipeline/-/raw/master/pipelineJupyter.ipynb && source /opt/intelpython3/bin/activate && jupyter notebook --ip 0.0.0.0 --allow-root --port 8888"
+CMD bash -c "sleep 2 && cd $SHARED_DIR && curl -LO https://gitlab.ics.muni.cz/467814/magicforcefield-pipeline/-/raw/master/pipelineJupyter.ipynb && source /opt/intelpython3/bin/activate && jupyter notebook --ip 0.0.0.0 --allow-root --port 8888"
