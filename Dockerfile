@@ -7,7 +7,7 @@ ARG INTELPYTHON
 ENV DEBIAN_FRONTEND=noninteractive 
 ENV TZ=Europe/Prague
 ENV BASE=/home/base
-ENV SHARED_DIR=/work
+ENV WORK=/work
 
 #install IntelPython from manually downloaded package specified in build script
 COPY ${INTELPYTHON} /tmp
@@ -65,10 +65,10 @@ RUN apt update && apt install -y docker-ce-cli nvidia-container-toolkit
 #copy all necessary files to run force field correction evaluation
 COPY modules ${BASE}/modules/
 COPY ./gromacs-plumed-docker/gromacs/gmx-docker orca-docker podman-run.py /opt/
-COPY tleapin.txt pipelineJupyter.ipynb ${BASE}/
+COPY tleapin.txt ${WORK}/
 
-WORKDIR ${SHARED_DIR}
+WORKDIR ${WORK}
 EXPOSE 8888
 
 #run Jupyter Notebook when container is executed
-CMD bash -c "sleep 2 && source /opt/intelpython3/bin/activate && jupyter notebook --ip 0.0.0.0 --allow-root --port 8888"
+CMD bash -c "sleep 2 && cd $WORK && curl -LO https://gitlab.ics.muni.cz/467814/magicforcefield-pipeline/-/blob/master/pipelineJupyter.ipynb && source /opt/intelpython3/bin/activate && jupyter notebook --ip 0.0.0.0 --allow-root --port 8888"
