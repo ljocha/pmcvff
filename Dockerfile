@@ -27,6 +27,7 @@ RUN bash -c "source /opt/intelpython3/bin/activate && jupyter-nbextension enable
 RUN bash -c "source /opt/intelpython3/bin/activate && conda install -y pandas"
 RUN bash -c "source /opt/intelpython3/bin/activate && conda install -y -c rmg py3dmol"
 RUN bash -c "source /opt/intelpython3/bin/activate && conda install -y -c conda-forge tqdm"
+RUN bash -c "source /opt/intelpython3/bin/activate && conda install -y -c plotly plotly"
 
 #install openbabel, amber, molvs
 RUN bash -c "source /opt/intelpython3/bin/activate && conda install -y -c openbabel openbabel"
@@ -41,6 +42,11 @@ RUN bash -c "source /opt/intelpython3/bin/activate && conda install -y -c rdkit 
 RUN bash -c "source /opt/intelpython3/bin/activate && conda install -y -c conda-forge acpype"
 RUN bash -c "source /opt/intelpython3/bin/activate && conda install -y -c conda-forge xorg-libxext"
 RUN bash -c "source /opt/intelpython3/bin/activate && conda install -y -c conda-forge pillow"
+
+#install parmtSNE
+RUN bash -c "apt-get update && apt-get install -y git"
+RUN bash -c "cd /opt && git clone https://github.com/spiwokv/parmtSNEcv.git" 
+RUN bash -c "source /opt/intelpython3/bin/activate && cd /opt/parmtSNEcv && pip instal ."
 
 #install other tools
 ARG distribution=ubuntu18.04
