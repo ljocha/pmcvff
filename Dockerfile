@@ -71,4 +71,4 @@ WORKDIR ${WORK}
 EXPOSE 8888
 
 #run Jupyter Notebook when container is executed
-CMD bash -c "sleep 2 && cd $WORK && curl -LO https://gitlab.ics.muni.cz/467814/magicforcefield-pipeline/-/blob/master/pipelineJupyter.ipynb && source /opt/intelpython3/bin/activate && jupyter notebook --ip 0.0.0.0 --allow-root --port 8888"
+CMD bash -c "sleep 2 && cd $WORK && curl -LO https://gitlab.ics.muni.cz/467814/magicforcefield-pipeline/-/raw/master/pipelineJupyter.ipynb && source /opt/intelpython3/bin/activate && jupyter notebook --ip 0.0.0.0 --allow-root --port 8888"
