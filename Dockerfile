@@ -48,15 +48,19 @@ RUN bash -c "apt-get update && apt-get install -y git"
 RUN bash -c "cd /opt && git clone https://github.com/spiwokv/parmtSNEcv.git" 
 RUN bash -c "source /opt/intelpython3/bin/activate && cd /opt/parmtSNEcv && pip instal ."
 
+#install kubectl
+RUN bash -c "apt-get update && apt-get install -y apt-transport-https gnupg2 curl xz-utils"
+RUN bash -c "curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -"
+RUN bash -c "echo 'deb https://apt.kubernetes.io/ kubernetes-xenial main' | sudo tee -a /etc/apt/sources.list.d/kubernetes.list"
+RUN bash -c "apt-get update && apt-get install -y kubectl"
+
 #install other tools
 ARG distribution=ubuntu18.04
-RUN bash -c "apt-get install -y xz-utils curl gnupg"
 RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
 RUN echo "deb [arch=amd64] https://download.docker.com/linux/ubuntu bionic stable" >>/etc/apt/sources.list
 RUN curl -s -L https://nvidia.github.io/nvidia-docker/gpgkey | apt-key add -
 RUN curl -s -L -o /etc/apt/sources.list.d/nvidia-docker.list https://nvidia.github.io/nvidia-docker/$distribution/nvidia-docker.list 
 RUN apt update && apt install -y docker-ce-cli nvidia-container-toolkit
-#-y docker.io nvidia-container-toolkit
 
 #copy all necessary files to run force field correction evaluation
 COPY modules ${BASE}/modules/
