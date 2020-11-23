@@ -2,12 +2,15 @@ FROM ubuntu:18.04
 
 USER root
 
+#add basic user
+RUN bash -c "useradd --uid 1001 --create-home --shell /bin/bash magic_user"
+
 #set variables
 ARG INTELPYTHON
 ENV DEBIAN_FRONTEND=noninteractive 
 ENV TZ=Europe/Prague
 ENV BASE=/home/base
-ENV SHARED_DIR=/work
+ENV WORKING_DIR=/work
 
 #install IntelPython from manually downloaded package specified in build script
 COPY ${INTELPYTHON} /tmp
@@ -65,10 +68,11 @@ RUN apt update && apt install -y docker-ce-cli nvidia-container-toolkit
 #copy all necessary files to run force field correction evaluation
 COPY modules ${BASE}/modules/
 COPY ./gromacs-plumed-docker/gromacs/gmx-docker orca-docker podman-run.py /opt/
-COPY tleapin.txt ${SHARED_DIR}/
+COPY tleapin.txt ${WORKING_DIR}/
 
-WORKDIR ${SHARED_DIR}
+WORKDIR ${WORKING_DIR}
 EXPOSE 8888
+RUN bash -c "chmod -R a+rX /opt"
 
 #run Jupyter Notebook when container is executed
-CMD bash -c "sleep 2 && cd $SHARED_DIR && curl -LO https://gitlab.ics.muni.cz/467814/magicforcefield-pipeline/-/raw/master/pipelineJupyter.ipynb && source /opt/intelpython3/bin/activate && jupyter notebook --ip 0.0.0.0 --allow-root --port 8888"
+CMD bash -c "sleep 2 && curl -LO https://gitlab.ics.muni.cz/467814/magicforcefield-pipeline/-/raw/master/pipelineJupyter.ipynb && source /opt/intelpython3/bin/activate && jupyter notebook --ip 0.0.0.0 --allow-root --port 8888"
