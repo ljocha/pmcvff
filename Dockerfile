@@ -10,7 +10,7 @@ ARG INTELPYTHON
 ENV DEBIAN_FRONTEND=noninteractive 
 ENV TZ=Europe/Prague
 ENV BASE=/home/base
-ENV WORKING_DIR=/work
+ENV SHARED_DIR=/work
 
 #install IntelPython from manually downloaded package specified in build script
 COPY ${INTELPYTHON} /tmp
@@ -38,7 +38,7 @@ RUN bash -c "source /opt/intelpython3/bin/activate && conda install -y ambertool
 RUN bash -c "source /opt/intelpython3/bin/activate && conda install -y -c conda-forge molvs"
 
 #install LibXrender1 needed for RDkit library
-RUN apt-get update && apt-get install -y libxrender1 libgfortran3
+RUN bash -c "apt-get update && apt-get install -y libxrender1 libgfortran3"
 RUN bash -c "source /opt/intelpython3/bin/activate && conda install -y -c rdkit rdkit"
 
 #install acpype and its needed packages xorg-libxext and pillow
@@ -59,20 +59,24 @@ RUN bash -c "apt-get update && apt-get install -y kubectl"
 
 #install other tools
 ARG distribution=ubuntu18.04
-RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
-RUN echo "deb [arch=amd64] https://download.docker.com/linux/ubuntu bionic stable" >>/etc/apt/sources.list
-RUN curl -s -L https://nvidia.github.io/nvidia-docker/gpgkey | apt-key add -
-RUN curl -s -L -o /etc/apt/sources.list.d/nvidia-docker.list https://nvidia.github.io/nvidia-docker/$distribution/nvidia-docker.list 
-RUN apt update && apt install -y docker-ce-cli nvidia-container-toolkit
+RUN bash -c "curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -"
+RUN bash -c "echo 'deb [arch=amd64] https://download.docker.com/linux/ubuntu bionic stable' >>/etc/apt/sources.list"
+RUN bash -c "curl -s -L https://nvidia.github.io/nvidia-docker/gpgkey | apt-key add -"
+RUN bash -c "curl -s -L -o /etc/apt/sources.list.d/nvidia-docker.list https://nvidia.github.io/nvidia-docker/$distribution/nvidia-docker.list" 
+RUN bash -c "apt update && apt install -y docker-ce-cli nvidia-container-toolkit"
+RUN bash -c "apt-get install sudo -y"
 
 #copy all necessary files to run force field correction evaluation
 COPY modules ${BASE}/modules/
 COPY ./gromacs-plumed-docker/gromacs/gmx-docker orca-docker podman-run.py /opt/
-COPY tleapin.txt ${WORKING_DIR}/
+COPY tleapin.txt ${SHARED_DIR}/
 
-WORKDIR ${WORKING_DIR}
+#give permissions
+RUN bash -c "chmod -R a+rX /opt /home"
+
+WORKDIR ${SHARED_DIR}
 EXPOSE 8888
-RUN bash -c "chmod -R a+rX /opt"
+
 
 #run Jupyter Notebook when container is executed
 CMD bash -c "sleep 2 && curl -LO https://gitlab.ics.muni.cz/467814/magicforcefield-pipeline/-/raw/master/pipelineJupyter.ipynb && source /opt/intelpython3/bin/activate && jupyter notebook --ip 0.0.0.0 --allow-root --port 8888"
