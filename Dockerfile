@@ -64,6 +64,7 @@ RUN bash -c "echo 'deb [arch=amd64] https://download.docker.com/linux/ubuntu bio
 RUN bash -c "curl -s -L https://nvidia.github.io/nvidia-docker/gpgkey | apt-key add -"
 RUN bash -c "curl -s -L -o /etc/apt/sources.list.d/nvidia-docker.list https://nvidia.github.io/nvidia-docker/$distribution/nvidia-docker.list" 
 RUN bash -c "apt update && apt install -y docker-ce-cli nvidia-container-toolkit"
+RUN bash -c "pip install 'ruamel.yaml<=0.15.94'"
 RUN bash -c "apt-get install sudo -y"
 
 #copy all necessary files to run force field correction evaluation
