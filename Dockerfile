@@ -64,7 +64,6 @@ RUN bash -c "echo 'deb [arch=amd64] https://download.docker.com/linux/ubuntu bio
 RUN bash -c "curl -s -L https://nvidia.github.io/nvidia-docker/gpgkey | apt-key add -"
 RUN bash -c "curl -s -L -o /etc/apt/sources.list.d/nvidia-docker.list https://nvidia.github.io/nvidia-docker/$distribution/nvidia-docker.list" 
 RUN bash -c "apt update && apt install -y docker-ce-cli nvidia-container-toolkit"
-RUN bash -c "pip install 'ruamel.yaml<=0.15.94'"
 RUN bash -c "apt-get install sudo -y"
 
 #copy all necessary files to run force field correction evaluation
@@ -80,4 +79,4 @@ EXPOSE 8888
 
 
 #run Jupyter Notebook when container is executed
-CMD bash -c "sleep 2 && curl -LO https://gitlab.ics.muni.cz/467814/magicforcefield-pipeline/-/raw/master/pipelineJupyter.ipynb && source /opt/intelpython3/bin/activate && jupyter notebook --ip 0.0.0.0 --allow-root --port 8888"
+CMD bash -c "sleep 2 && curl -LO https://gitlab.ics.muni.cz/467814/magicforcefield-pipeline/-/raw/kubernetes/pipelineJupyter.ipynb && source /opt/intelpython3/bin/activate && jupyter notebook --ip 0.0.0.0 --allow-root --port 8888"
