@@ -141,6 +141,12 @@ def write_template(method, image, command, workdir, **kwargs):
 		if workdir:
 			doc['spec']['template']['spec']['containers'][0]['workingDir'] = f"/tmp/{workdir}"
 
+		#set PVC
+		pvc_name = os.environ['PVC_NAME']
+		if len(pvc_name) == 0:
+			raise Exception("Error setting pvc_name, probably problem in setting env variable of actual container")
+		doc['spec']['template']['spec']['volumes'][0]['persistentVolumeClaim']['claimName'] = pvc_name
+
 		#write to file	
 		ofile_name = "{}-{}-rdtscp.yaml".format(default_name, method) 
 		with open(ofile_name, "w") as ofile:
