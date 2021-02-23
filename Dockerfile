@@ -49,7 +49,7 @@ RUN bash -c "source /opt/intelpython3/bin/activate && conda install -y -c conda-
 #install parmtSNE
 RUN bash -c "apt-get update && apt-get install -y git"
 RUN bash -c "cd /opt && git clone https://github.com/spiwokv/parmtSNEcv.git" 
-RUN bash -c "source /opt/intelpython3/bin/activate && cd /opt/parmtSNEcv && pip install . && pip install tensorflow"
+RUN bash -c "source /opt/intelpython3/bin/activate && pip install 'ruamel.yaml<=0.15.94' && cd /opt/parmtSNEcv && pip install . && pip install --ignore-installed six tensorflow"
 
 #install kubectl
 RUN bash -c "apt-get update && apt-get install -y apt-transport-https gnupg2 curl xz-utils"
