@@ -65,6 +65,7 @@ RUN bash -c "curl -s -L https://nvidia.github.io/nvidia-docker/gpgkey | apt-key 
 RUN bash -c "curl -s -L -o /etc/apt/sources.list.d/nvidia-docker.list https://nvidia.github.io/nvidia-docker/$distribution/nvidia-docker.list" 
 RUN bash -c "apt update && apt install -y docker-ce-cli nvidia-container-toolkit"
 RUN bash -c "apt-get install sudo -y"
+RUN bash -c "apt-get install jq -y"
 
 #copy all necessary files to run force field correction evaluation
 COPY modules ${BASE}/modules/
