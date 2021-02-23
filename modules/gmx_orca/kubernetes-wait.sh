@@ -13,12 +13,16 @@ if [[ -z $pod_name ]]; then
 fi
 
 # Wait until pod is alive or succeeded
+count=0
 while true; do
-    status="$(kubectl get pods $pod_name -n mff-user-ns -o 'jsonpath={..status.conditions[?(@.type=="Ready")].reason}')"
+    status="$(kubectl get pods $pod_name -n mff-user-ns -o 'jsonpath={..status.cc
+onditions[?(@.type=="Ready")].reason}')"
     if [[ $? != 0 || "$status" == "PodCompleted" ]]; then
         break
     fi
-    
-    echo "waiting for pod .."
+    echo -ne "finished in $count"\\r
+    count=$((count+$wait_time))
     sleep $wait_time
 done
+
+kubectl logs $pod_name
