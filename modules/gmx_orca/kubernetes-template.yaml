@@ -29,6 +29,6 @@ spec:
       volumes:
         - name: shared-volume
           persistentVolumeClaim:
-            claimName: jupyter-claim
+            claimName: SUBSTITUTE
   backoffLimit: 3
   ttlSecondsAfterFinished: 10
