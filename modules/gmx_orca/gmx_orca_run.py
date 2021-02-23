@@ -63,7 +63,7 @@ def gmx_run(gmx_command, **kwargs):
 	os.system("kubectl apply -f {}".format(kubernetes_config))
 
 	# Run the shell script to wait until kubernetes pod - container finishes
-	cmd = f"/work/kubernetes-wait.sh {name} 2"
+	cmd = f"{os.path.dirname(os.path.realpath(__file__))}/kubernetes-wait.sh {name} 2"
 	process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
 	process.wait()
 	
