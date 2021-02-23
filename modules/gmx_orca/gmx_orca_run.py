@@ -101,7 +101,7 @@ def write_template(method, image, command, workdir, **kwargs):
 	:kwargs bool rdtscp: enable rdtscp for gmx
 	:return: name of kubernetes configuration file
 	'''
-	with open("kubernetes-template.yaml") as ifile:
+	with open(f"{os.path.dirname(os.path.realpath(__file__))}/kubernetes-template.yaml") as ifile:
 		doc = ruamel_yaml.round_trip_load(ifile, preserve_quotes=True)
 
 		double = kwargs.get('double', 'OFF')
