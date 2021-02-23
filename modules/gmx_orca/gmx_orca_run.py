@@ -67,7 +67,8 @@ def gmx_run(gmx_command, **kwargs):
 	process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
 	process.wait()
 	
-	print('Finished')
+	print(process.communicate()[0].decode('utf-8'))
+	print('--------')
 
 
 def orca_run(orca_method, log, **kwargs):
