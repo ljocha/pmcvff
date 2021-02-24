@@ -60,14 +60,17 @@ def gmx_run(gmx_command, **kwargs):
 		gmx = "(echo \'{}\'; sleep 1; echo q) {}".format(make_ndx, gmx)
 
 	kubernetes_config, name = write_template(gmx_method, image, gmx, workdir, double=double, rdtscp=rdtscp, arch=arch)
-	os.system("kubectl apply -f {}".format(kubernetes_config))
 
-	# Run the shell script to wait until kubernetes pod - container finishes
-	cmd = f"{os.path.dirname(os.path.realpath(__file__))}/kubernetes-wait.sh {name} 2"
-	process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
-	process.wait()
-	
-	print(process.communicate()[0].decode('utf-8'))
+	# Run pod
+	os.system(f"kubectl apply -f {kubernetes_config}")
+
+	# Wait for pod to finish
+	os.system(f"kubectl wait --for=condition=complete -f {kubernetes_config}")
+
+	# Print log
+	rancher_pod_name = f'kubectl get pods -n mff-user-ns -o json | jq ".items[] | select(.metadata.name|test(\\"{name}\\"))| .metadata.name" | tr -d \\\"'
+	gmx_log = os.popen(f"kubectl logs $({rancher_pod_name})").read()
+	print(gmx_log)
 	print('--------')
 
 
