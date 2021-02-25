@@ -64,8 +64,8 @@ def gmx_run(gmx_command, **kwargs):
 	# Run pod
 	os.system(f"kubectl apply -f {kubernetes_config}")
 
-	# Wait for pod to finish
-	os.system(f"kubectl wait --for=condition=complete -f {kubernetes_config}")
+	# Wait for pod to finish - timeout is 4hours
+	os.system(f"kubectl wait --for=condition=complete -f {kubernetes_config} --timeout 14400s")
 
 	# Print log
 	rancher_pod_name = f'kubectl get pods -n mff-user-ns -o json | jq ".items[] | select(.metadata.name|test(\\"{name}\\"))| .metadata.name" | tr -d \\\"'
