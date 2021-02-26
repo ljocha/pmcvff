@@ -20,6 +20,7 @@ def gmx_run(gmx_command, **kwargs):
 	:kwargs str make_ndx: specify interactive make_ndx input for gromacs make_ndx
 	:kwargs str image: specify used image
 	:kwargs str workdir: specify directory where should the calculation take place
+	:kwargs str arch: specify architecture
 	:kwargs bool double: double precision for mdrun
 	:kwargs bool rdtscp: enable rndscp
 	'''
@@ -133,9 +134,9 @@ def write_template(method, image, command, workdir, **kwargs):
 
 		#if not orca, set options for gmx container
 		if method != "orca":
-			double_env = {'name' : "DOUBLE", 'value' : DoubleQuotedScalarString("ON" if double == True else "OFF")}
-			rdtscp_env = {'name' : "RDTSCP", 'value' : DoubleQuotedScalarString("ON" if rdtscp == True else "OFF")}
-			arch_env = {'name' : "ARCH", 'value' : DoubleQuotedScalarString(arch)}
+			double_env = {'name' : "GMX_DOUBLE", 'value' : DoubleQuotedScalarString("ON" if double else "OFF")}
+			rdtscp_env = {'name' : "GMX_RDTSCP", 'value' : DoubleQuotedScalarString("ON" if rdtscp else "OFF")}
+			arch_env = {'name' : "GMX_ARCH", 'value' : DoubleQuotedScalarString(arch)}
 			doc['spec']['template']['spec']['containers'][0]['env'] = [double_env, rdtscp_env, arch_env]
 
 		#set image
