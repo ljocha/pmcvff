@@ -6,7 +6,7 @@ import time
 import os
 
 #set image to be used for gromacs calculations
-GMX_IMAGE = "ljocha/gromacs_universal:2020.02.06-1"
+GMX_IMAGE = "ljocha/gromacs:2021-1"
 #set image to be used for orca calculations
 ORCA_IMAGE = "spectraes/pipeline_orca:latest"
 
