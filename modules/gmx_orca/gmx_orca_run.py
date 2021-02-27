@@ -60,19 +60,16 @@ def gmx_run(gmx_command, **kwargs):
 		gmx = "| {}".format(gmx)
 		gmx = "(echo \'{}\'; sleep 1; echo q) {}".format(make_ndx, gmx)
 
-	kubernetes_config, name = write_template(gmx_method, image, gmx, workdir, double=double, rdtscp=rdtscp, arch=arch)
+	kubernetes_config = write_template(gmx_method, image, gmx, workdir, double=double, rdtscp=rdtscp, arch=arch)
 
-	# Run pod
-	os.system(f"kubectl apply -f {kubernetes_config}")
-
-	# Wait for pod to finish - timeout is 4hours
-	os.system(f"kubectl wait --for=condition=complete -f {kubernetes_config} --timeout 14400s")
-
-	# Print log
-	rancher_pod_name = f'kubectl get pods -n mff-user-ns -o json | jq ".items[] | select(.metadata.name|test(\\"{name}\\"))| .metadata.name" | tr -d \\\"'
-	gmx_log = os.popen(f"kubectl logs $({rancher_pod_name})").read()
-	print(gmx_log)
+	# Run the shell script to wait until kubernetes pod - container finishes
+	cmd = f"{os.path.dirname(os.path.realpath(__file__))}/kubernetes-wait.sh -f {kubernetes_config}"
+	process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
+	process.wait()
+	
+	print(process.communicate()[0].decode('utf-8'))
 	print('--------')
+
 
 
 def orca_run(orca_method, log, **kwargs):
@@ -157,5 +154,4 @@ def write_template(method, image, command, workdir, **kwargs):
 		with open(ofile_name, "w") as ofile:
 			ruamel_yaml.round_trip_dump(doc, ofile, explicit_start=True)
 
-		return ofile_name, doc['metadata']['name']
-
+		return ofile_name
