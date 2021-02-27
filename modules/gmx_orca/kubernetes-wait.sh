@@ -37,9 +37,9 @@ wait -n $completion_pid $failure_pid
 exit_code=$?
 
 if (( $exit_code == 0 )); then
-  echo "Job succeeded" && kill $failure_pid
+  echo "Job succeeded" && pkill -P $failure_pid
 else
-  echo "Job failed with exit code ${exit_code}" && kill $completion_pid
+  echo "Job failed with exit code ${exit_code}" && pkill -P $completion_pid
 fi
 
 kubectl logs $pod_name
