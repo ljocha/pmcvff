@@ -1,28 +1,45 @@
 #!/bin/bash
-# First parameter is pod name (base without hash)
-# Second parameter is wait time between every pulse
 
-name="$1"
-wait_time="$2"
+while getopts ":f:" opt; do
+  case $opt in
+    f)
+      filename="$OPTARG"
+      echo "waiting for $filename" >&2
+      ;;
+    \?)
+      echo "Invalid option: -$OPTARG" >&2
+      exit 1
+      ;;
+    :)
+      echo "Option -$OPTARG requires an argument." >&2
+      exit 1
+      ;;
+  esac
+done
 
-# Get whole name of pod (with Rancher hash)
+
+# get pod base
+name="$(cat $filename | grep name | head -1 | awk '{print $2}')"
+
+# get pod name with rancher hash
 pod_name="$(kubectl get pods -n mff-user-ns -o json | jq ".items[] | select(.metadata.name|test(\"$name\"))| .metadata.name" | tr -d \")"
-
 if [[ -z $pod_name ]]; then
     echo "error finding pod" && exit 1
 fi
 
-# Wait until pod is alive or succeeded
-count=0
-while true; do
-    status="$(kubectl get pods $pod_name -n mff-user-ns -o 'jsonpath={..status.cc
-onditions[?(@.type=="Ready")].reason}')"
-    if [[ $? != 0 || "$status" == "PodCompleted" ]]; then
-        break
-    fi
-    echo -ne "finished in $count"\\r
-    count=$((count+$wait_time))
-    sleep $wait_time
-done
+kubectl wait --for=condition=complete -f $filename --timeout 14400s &
+completion_pid=$!
+
+kubectl wait --for=condition=failed -f $filename --timeout 14400s && exit 1 &
+failure_pid=$!
+
+wait -n $completion_pid $failure_pid
+exit_code=$?
+
+if (( $exit_code == 0 )); then
+  echo "Job succeeded" && kill $failure_pid
+else
+  echo "Job failed with exit code ${exit_code}" && kill $completion_pid
+fi
 
 kubectl logs $pod_name
