@@ -27,7 +27,7 @@ if [[ -z $pod_name ]]; then
     echo "error finding pod" && exit 1
 fi
 
-kubectl wait --for=condition=complete -f $filename --timeout 14400s &
+kubectl wait --for=condition=complete -f $filename --timeout 14400s && exit 0 &
 completion_pid=$!
 
 kubectl wait --for=condition=failed -f $filename --timeout 14400s && exit 1 &
@@ -37,9 +37,11 @@ wait -n $completion_pid $failure_pid
 exit_code=$?
 
 if (( $exit_code == 0 )); then
-  echo "Job succeeded" && pkill -P $failure_pid
+  echo "Job succeeded"
+  pkill -P $failure_pid
 else
-  echo "Job failed with exit code ${exit_code}" && pkill -P $completion_pid
+  echo "Job failed"
+  pkill -P $completion_pid
 fi
 
 kubectl logs $pod_name
