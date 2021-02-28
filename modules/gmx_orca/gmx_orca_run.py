@@ -142,8 +142,9 @@ def write_template(method, image, command, workdir, **kwargs):
 		doc['spec']['template']['spec']['containers'][0]['image'] = default_image if not image else image	
 
 		#set working directory
+		doc['spec']['template']['spec']['containers'][0]['workingDir'] = "/tmp/"
 		if workdir:
-			doc['spec']['template']['spec']['containers'][0]['workingDir'] = f"/tmp/{workdir}"
+			doc['spec']['template']['spec']['containers'][0]['workingDir'] += workdir
 
 		#set PVC
 		pvc_name = os.environ['PVC_NAME']
