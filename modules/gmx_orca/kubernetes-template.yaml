@@ -25,10 +25,10 @@ spec:
               cpu: 16
             requests:
               cpu: 4
-      restartPolicy: OnFailure
+      restartPolicy: Never
       volumes:
         - name: shared-volume
           persistentVolumeClaim:
             claimName: SUBSTITUTE
-  backoffLimit: 3
+  backoffLimit: 0
   # ttlSecondsAfterFinished: 180
