@@ -78,6 +78,7 @@ def orca_run(orca_method, log, **kwargs):
 	image = kwargs.get('image', None)
 	workdir = kwargs.get('workdir', None)
 
+	log = f"/tmp/{log}"
 	application = "orca"
 	orca = "/opt/orca/{} {} > {}".format(application, orca_method, log)
 
