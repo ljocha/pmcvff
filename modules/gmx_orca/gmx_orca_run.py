@@ -61,15 +61,7 @@ def gmx_run(gmx_command, **kwargs):
 		gmx = "(echo \'{}\'; sleep 1; echo q) {}".format(make_ndx, gmx)
 
 	kubernetes_config = write_template(gmx_method, image, gmx, workdir, double=double, rdtscp=rdtscp, arch=arch)
-
-	os.system(f"kubectl apply -f {kubernetes_config}")
-
-	# Run the shell script to wait until kubernetes pod - container finishes
-	cmd = f"{os.path.dirname(os.path.realpath(__file__))}/kubernetes-wait.sh -f {kubernetes_config}"
-	process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
-	
-	# Wait until k8s (kubernetes-wait.sh) finishes and print the output
-	print(process.communicate()[0].decode('utf-8'))
+	print(run_job(kubernetes_config))
 	print('--------')
 
 
@@ -88,9 +80,10 @@ def orca_run(orca_method, log, **kwargs):
 
 	application = "orca"
 	orca = "/opt/orca/{} {} > {}".format(application, orca_method, log)
-	
+
 	kubernetes_config = write_template(application, image, orca, workdir)
-	os.system("kubectl apply -f {}".format(kubernetes_config))
+	print(run_job(kubernetes_config))
+	print('--------')
 
 
 def write_template(method, image, command, workdir, **kwargs):
@@ -158,3 +151,19 @@ def write_template(method, image, command, workdir, **kwargs):
 			ruamel_yaml.round_trip_dump(doc, ofile, explicit_start=True)
 
 		return ofile_name
+
+def run_job(kubernetes_config):
+	'''
+	Run kubernetes job specified in kubernetes_config
+
+	:param str kubernetes_config: specify kubernetes config file
+	:return: str output of kubernetes job
+	'''
+	os.system(f"kubectl apply -f {kubernetes_config}")
+
+	# Run the shell script to wait until kubernetes pod - container finishes
+	cmd = f"{os.path.dirname(os.path.realpath(__file__))}/kubernetes-wait.sh -f {kubernetes_config}"
+	process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
+	
+	# Wait until k8s (kubernetes-wait.sh) finishes and return the output
+	return process.communicate()[0].decode('utf-8')
