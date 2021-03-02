@@ -22,7 +22,7 @@ spec:
               name: shared-volume
           resources:
             limits:
-              cpu: 16
+              cpu: 20
             requests:
               cpu: 4
       restartPolicy: Never
