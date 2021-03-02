@@ -5,9 +5,9 @@ import subprocess
 import time
 import os
 
-#set image to be used for gromacs calculations
+# Set image to be used for gromacs calculations
 GMX_IMAGE = "ljocha/gromacs:2021-1"
-#set image to be used for orca calculations
+# Set image to be used for orca calculations
 ORCA_IMAGE = "spectraes/pipeline_orca:latest"
 
 def gmx_run(gmx_command, **kwargs):
@@ -108,36 +108,36 @@ def write_template(method, image, command, workdir, **kwargs):
 		orca_method_file = kwargs.get('orca_method_file', '')
 		arch = kwargs.get('arch', '')
 
-		#set default values
+		# Set default values
 		default_image = GMX_IMAGE
 		default_name = "gromacs"
 		if method == "orca":
 			default_image = ORCA_IMAGE
 			default_name = "orca"			
 
-		# Replace "_" with "-" because "_" is not kubernetes accepted char in the name
+		# Always replace "_" with "-" because "_" is not kubernetes accepted char in the name
 		method = method.replace("_","-")
 		
-		#set names
+		# Set names
 		timestamp = str(time.time()).replace(".", "")	
 		doc['metadata']['name'] = "{}-{}-rdtscp-{}".format(default_name, method, timestamp)
 		doc['spec']['template']['metadata']['labels']['app'] = "{}-{}-rdtscp-{}".format(default_name, method, timestamp)
 		doc['spec']['template']['spec']['containers'][0]['name'] = "{}-{}-deployment-{}".format(default_name, method, timestamp)
 
-		#set gromacs args
+		# Set gromacs args
 		doc['spec']['template']['spec']['containers'][0]['args'] = ["/bin/bash", "-c", DoubleQuotedScalarString(command)]
 
-		#if not orca, set options for gmx container
+		# If not orca, set options for gmx container
 		if method != "orca":
 			double_env = {'name' : "GMX_DOUBLE", 'value' : DoubleQuotedScalarString("ON" if double else "OFF")}
 			rdtscp_env = {'name' : "GMX_RDTSCP", 'value' : DoubleQuotedScalarString("ON" if rdtscp else "OFF")}
 			arch_env = {'name' : "GMX_ARCH", 'value' : DoubleQuotedScalarString(arch)}
 			doc['spec']['template']['spec']['containers'][0]['env'] = [double_env, rdtscp_env, arch_env]
 
-		#set image
+		# Set image
 		doc['spec']['template']['spec']['containers'][0]['image'] = default_image if not image else image	
 
-		#set working directory
+		# Set working directory
 		doc['spec']['template']['spec']['containers'][0]['workingDir'] = "/tmp/"
 		if workdir:
 			doc['spec']['template']['spec']['containers'][0]['workingDir'] += workdir
@@ -148,13 +148,13 @@ def write_template(method, image, command, workdir, **kwargs):
 			raise Exception("Error setting pvc_name, probably problem in setting env variable of actual container")
 		doc['spec']['template']['spec']['volumes'][0]['persistentVolumeClaim']['claimName'] = pvc_name
 
-		#set orca required cpus
+		# Set orca required cpus
 		if method == "orca":
 			no_of_procs = get_no_of_procs(orca_method_file)
 			if no_of_procs != -1:
 				doc['spec']['template']['spec']['containers'][0]['resources']['requests']['cpu'] = no_of_procs
 
-		#write to file	
+		# Write to file	
 		ofile_name = "{}-{}-rdtscp.yaml".format(default_name, method) 
 		with open(ofile_name, "w") as ofile:
 			ruamel_yaml.round_trip_dump(doc, ofile, explicit_start=True)
