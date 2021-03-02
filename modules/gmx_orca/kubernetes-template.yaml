@@ -24,7 +24,7 @@ spec:
             limits:
               cpu: 20
             requests:
-              cpu: 4
+              cpu: SUBSTITUTE
       restartPolicy: Never
       volumes:
         - name: shared-volume
