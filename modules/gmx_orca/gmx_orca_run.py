@@ -82,7 +82,7 @@ def orca_run(orca_method, log, **kwargs):
 	application = "orca"
 	orca = "/opt/orca/{} {} > {}".format(application, orca_method, log)
 
-	kubernetes_config = write_template(application, image, orca, workdir, orca_method_file=workdir+orca_method)
+	kubernetes_config = write_template(application, image, orca, workdir, orca_method_file=f"{workdir}/{orca_method}")
 	print(run_job(kubernetes_config))
 	print('--------')
 
