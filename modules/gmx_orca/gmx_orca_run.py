@@ -149,7 +149,7 @@ def write_template(method, image, command, workdir, **kwargs):
 		doc['spec']['template']['spec']['volumes'][0]['persistentVolumeClaim']['claimName'] = pvc_name
 
 		#set orca required cpus
-		if method == orca:
+		if method == "orca":
 			no_of_procs = get_no_of_procs(orca_method_file)
 			if no_of_procs != -1:
 				doc['spec']['template']['spec']['containers'][0]['resources']['requests']['cpu'] = no_of_procs
