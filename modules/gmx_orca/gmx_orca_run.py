@@ -152,7 +152,7 @@ def write_template(method, image, command, workdir, **kwargs):
 		if method == orca:
 			no_of_procs = get_no_of_procs(orca_method_file)
 			if no_of_procs != -1:
-				doc['spec']['template']['spec']['containers'][0]['resources']['limits']['cpu'] = no_of_procs
+				doc['spec']['template']['spec']['containers'][0]['resources']['requests']['cpu'] = no_of_procs
 
 		#write to file	
 		ofile_name = "{}-{}-rdtscp.yaml".format(default_name, method) 
