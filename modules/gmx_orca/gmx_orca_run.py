@@ -82,7 +82,7 @@ def orca_run(orca_method, log, **kwargs):
 	application = "orca"
 	orca = "/opt/orca/{} {} > {}".format(application, orca_method, log)
 
-	kubernetes_config = write_template(application, image, orca, workdir)
+	kubernetes_config = write_template(application, image, orca, workdir, orca_method_file=workdir+orca_method)
 	print(run_job(kubernetes_config))
 	print('--------')
 
@@ -95,6 +95,7 @@ def write_template(method, image, command, workdir, **kwargs):
 	:param str image: image used for calculation
 	:param str command: command passed to gromacs/orca application (also can be plumed) 
 	:param str workdir: specify directory where should the calculation take place
+	:param str orca_method_file: orca_method file to be run
 	:kwargs bool double: enable double precision for gmx
 	:kwargs bool rdtscp: enable rdtscp for gmx
 	:return: name of kubernetes configuration file
@@ -104,6 +105,7 @@ def write_template(method, image, command, workdir, **kwargs):
 
 		double = kwargs.get('double', 'OFF')
 		rdtscp = kwargs.get('rdtscp', 'OFF')
+		orca_method_file = kwargs.get('orca_method_file', '')
 		arch = kwargs.get('arch', '')
 
 		#set default values
@@ -146,6 +148,12 @@ def write_template(method, image, command, workdir, **kwargs):
 			raise Exception("Error setting pvc_name, probably problem in setting env variable of actual container")
 		doc['spec']['template']['spec']['volumes'][0]['persistentVolumeClaim']['claimName'] = pvc_name
 
+		#set orca required cpus
+		if method == orca:
+			no_of_procs = get_no_of_procs(orca_method_file)
+			if no_of_procs != -1:
+				doc['spec']['template']['spec']['containers'][0]['resources']['limits']['cpu'] = no_of_procs
+
 		#write to file	
 		ofile_name = "{}-{}-rdtscp.yaml".format(default_name, method) 
 		with open(ofile_name, "w") as ofile:
@@ -168,3 +176,16 @@ def run_job(kubernetes_config):
 	
 	# Wait until k8s (kubernetes-wait.sh) finishes and return the output
 	return process.communicate()[0].decode('utf-8')
+
+def get_no_of_procs(orca_method_file):
+	'''
+	Get number of CPU's required by orca method file
+
+	:param str orca_method_file: specify file path of orca method
+	:return: int number of required CPU's
+	'''
+	with open(orca_method_file) as ifile:
+		for line in ifile.readlines():
+			if "nprocs" in line:
+				return int(line.split()[1])
+		return -1
