@@ -4,26 +4,29 @@ from ruamel_yaml.scalarstring import DoubleQuotedScalarString
 import subprocess
 import time
 import os
+import sys
 
 # Set image to be used for gromacs calculations
 GMX_IMAGE = "ljocha/gromacs:2021-1"
 # Set image to be used for orca calculations
 ORCA_IMAGE = "spectraes/pipeline_orca:latest"
 
-def gmx_run(gmx_command, **kwargs):
-	'''
-	Convert gmx command into yaml file which is then run by kubernetes
 
-	:param str gmx_command: gromacs command
-	:kwargs int mpi_run: request number of cpus for mpi_run
-	:kwargs str groups: specify interactive groups for gromacs
-	:kwargs str make_ndx: specify interactive make_ndx input for gromacs make_ndx
-	:kwargs str image: specify used image
-	:kwargs str workdir: specify directory where should the calculation take place
-	:kwargs str arch: specify architecture
-	:kwargs bool double: double precision for mdrun
-	:kwargs bool rdtscp: enable rndscp
-	'''
+def gmx_run(gmx_command, **kwargs):
+	"""
+    Convert gmx command into yaml file which is then run by kubernetes
+
+    :param str gmx_command: gromacs command
+    :kwargs int mpi_run: request number of cpus for mpi_run
+    :kwargs str groups: specify interactive groups for gromacs
+    :kwargs str make_ndx: specify interactive make_ndx input for gromacs make_ndx
+    :kwargs str image: specify used image
+    :kwargs str workdir: specify directory where should the calculation take place
+    :kwargs str arch: specify architecture
+    :kwargs bool double: double precision for mdrun
+    :kwargs bool rdtscp: enable rndscp
+    :kwargs bool parallel: run jobs as parallel
+    """
 
 	mpi_run = kwargs.get('mpi_run', None)
 	groups = kwargs.get('groups', None)
@@ -33,6 +36,7 @@ def gmx_run(gmx_command, **kwargs):
 	double = kwargs.get('double', False)
 	rdtscp = kwargs.get('rdtscp', False)
 	arch = kwargs.get('arch', '')
+	parallel = kwargs.get('parallel', False)
 
 	gmx_method = gmx_command.split()[0]
 	application = "gmx"
@@ -45,11 +49,11 @@ def gmx_run(gmx_command, **kwargs):
 
 	if mpi_run:
 		gmx = "mpirun -np {} {}".format(mpi_run, gmx)
-			
+
 	if groups:
 		gmx = ") | {}".format(gmx)
 		for i in range(len(groups)):
-			# Write in reverse order because you insert from right to left           
+			# Write in reverse order because you insert from right to left
 			gmx = "echo {} {}".format(groups[::-1][i], gmx)
 			if i == (len(groups) - 1):
 				gmx = "({}".format(gmx)
@@ -60,46 +64,50 @@ def gmx_run(gmx_command, **kwargs):
 		gmx = "| {}".format(gmx)
 		gmx = "(echo \'{}\'; sleep 1; echo q) {}".format(make_ndx, gmx)
 
-	kubernetes_config = write_template(gmx_method, image, gmx, workdir, double=double, rdtscp=rdtscp, arch=arch)
-	print(run_job(kubernetes_config))
+	kubernetes_config = write_template(gmx_method, image, gmx, workdir, parallel, double=double, rdtscp=rdtscp,
+									   arch=arch)
+	print(run_job(kubernetes_config, parallel))
 	print('--------')
 
 
-
 def orca_run(orca_method, log, **kwargs):
-	'''
-	Convert orca command into yaml file which is then run by kubernetes
-	
-	:param str orca_command: orca method used for computation
-	:param str log: log file to store output of computation
-	:kwargs str image: specify used image
-	:kwargs str workdir: specify directory where should the calculation take place
-	'''
+	"""
+    Convert orca command into yaml file which is then run by kubernetes
+
+    :param str orca_command: orca method used for computation
+    :param str log: log file to store output of computation
+    :kwargs str image: specify used image
+    :kwargs str workdir: specify directory where should the calculation take place
+    """
 	image = kwargs.get('image', None)
 	workdir = kwargs.get('workdir', None)
+	parallel = kwargs.get('parallel', False)
 
 	log = f"/tmp/{log}"
 	application = "orca"
 	orca = "/opt/orca/{} {} > {}".format(application, orca_method, log)
 
-	kubernetes_config = write_template(application, image, orca, workdir, orca_method_file=f"{workdir}/{orca_method}")
-	print(run_job(kubernetes_config))
+	kubernetes_config = write_template(application, image, orca, workdir,parallel, orca_method_file=f"{workdir}/{orca_method}")
+	print(run_job(kubernetes_config, parallel))
 	print('--------')
 
 
-def write_template(method, image, command, workdir, **kwargs):
-	'''
-	Writes information about gromacs/orca container run into kubernetes configuration file
+def parallel_wait():
+	"""
+	Wait for all currently running parallel tasks to finish
 
-	:param str method: file name based on used method
-	:param str image: image used for calculation
-	:param str command: command passed to gromacs/orca application (also can be plumed) 
-	:param str workdir: specify directory where should the calculation take place
-	:param str orca_method_file: orca_method file to be run
-	:kwargs bool double: enable double precision for gmx
-	:kwargs bool rdtscp: enable rdtscp for gmx
-	:return: name of kubernetes configuration file
-	'''
+	:return: Nothing
+	"""
+	label = None
+	try:
+		label = os.environ['PARALLEL_LABEL']
+	except KeyError as e:
+		print("Nothing to wait for. Run gmx_run or orca_run with parallel flag first", file=sys.stderr)
+
+	print(run_wait(f"-l {label}"))
+
+
+def write_template(method, image, command, workdir, parallel, **kwargs):
 	with open(f"{os.path.dirname(os.path.realpath(__file__))}/kubernetes-template.yaml") as ifile:
 		doc = ruamel_yaml.round_trip_load(ifile, preserve_quotes=True)
 
@@ -113,36 +121,46 @@ def write_template(method, image, command, workdir, **kwargs):
 		default_name = "gromacs"
 		if method == "orca":
 			default_image = ORCA_IMAGE
-			default_name = "orca"			
+			default_name = "orca"
 
 		# Always replace "_" with "-" because "_" is not kubernetes accepted char in the name
-		method = method.replace("_","-")
-		
+		method = method.replace("_", "-")
+
 		# Set names
-		timestamp = str(time.time()).replace(".", "")	
-		doc['metadata']['name'] = "{}-{}-rdtscp-{}".format(default_name, method, timestamp)
-		doc['spec']['template']['metadata']['labels']['app'] = "{}-{}-rdtscp-{}".format(default_name, method, timestamp)
-		doc['spec']['template']['spec']['containers'][0]['name'] = "{}-{}-deployment-{}".format(default_name, method, timestamp)
+		timestamp = str(time.time()).replace(".", "")
+		identificator = "{}-{}-rdtscp-{}".format(default_name, method, timestamp)
+		doc['metadata']['name'] = identificator
+		doc['spec']['template']['spec']['containers'][0]['name'] = "{}-{}-deployment-{}".format(default_name, method,
+																								timestamp)
+
+		# Set label
+		if parallel:
+			try:
+				doc['spec']['template']['metadata']['labels']['app'] = os.environ['PARALLEL_LABEL']
+			except KeyError as e:
+				os.environ['PARALLEL_LABEL'] = identificator
+				doc['spec']['template']['metadata']['labels']['app'] = identificator
 
 		# Set gromacs args
-		doc['spec']['template']['spec']['containers'][0]['args'] = ["/bin/bash", "-c", DoubleQuotedScalarString(command)]
+		doc['spec']['template']['spec']['containers'][0]['args'] = ["/bin/bash", "-c",
+																	DoubleQuotedScalarString(command)]
 
 		# If not orca, set options for gmx container
 		if method != "orca":
-			double_env = {'name' : "GMX_DOUBLE", 'value' : DoubleQuotedScalarString("ON" if double else "OFF")}
-			rdtscp_env = {'name' : "GMX_RDTSCP", 'value' : DoubleQuotedScalarString("ON" if rdtscp else "OFF")}
-			arch_env = {'name' : "GMX_ARCH", 'value' : DoubleQuotedScalarString(arch)}
+			double_env = {'name': "GMX_DOUBLE", 'value': DoubleQuotedScalarString("ON" if double else "OFF")}
+			rdtscp_env = {'name': "GMX_RDTSCP", 'value': DoubleQuotedScalarString("ON" if rdtscp else "OFF")}
+			arch_env = {'name': "GMX_ARCH", 'value': DoubleQuotedScalarString(arch)}
 			doc['spec']['template']['spec']['containers'][0]['env'] = [double_env, rdtscp_env, arch_env]
 
 		# Set image
-		doc['spec']['template']['spec']['containers'][0]['image'] = default_image if not image else image	
+		doc['spec']['template']['spec']['containers'][0]['image'] = default_image if not image else image
 
 		# Set working directory
 		doc['spec']['template']['spec']['containers'][0]['workingDir'] = "/tmp/"
 		if workdir:
 			doc['spec']['template']['spec']['containers'][0]['workingDir'] += workdir
 
-		#set PVC
+		# set PVC
 		pvc_name = os.environ['PVC_NAME']
 		if len(pvc_name) == 0:
 			raise Exception("Error setting pvc_name, probably problem in setting env variable of actual container")
@@ -154,38 +172,33 @@ def write_template(method, image, command, workdir, **kwargs):
 			if no_of_procs != -1:
 				doc['spec']['template']['spec']['containers'][0]['resources']['requests']['cpu'] = no_of_procs
 
-		# Write to file	
-		ofile_name = "{}-{}-rdtscp.yaml".format(default_name, method) 
+		# Write to file
+		ofile_name = "{}-{}-rdtscp.yaml".format(default_name, method)
 		with open(ofile_name, "w") as ofile:
 			ruamel_yaml.round_trip_dump(doc, ofile, explicit_start=True)
 
 		return ofile_name
 
-def run_job(kubernetes_config):
-	'''
-	Run kubernetes job specified in kubernetes_config
 
-	:param str kubernetes_config: specify kubernetes config file
-	:return: str output of kubernetes job
-	'''
+def run_job(kubernetes_config, parallel):
 	os.system(f"kubectl apply -f {kubernetes_config}")
 
-	# Run the shell script to wait until kubernetes pod - container finishes
-	cmd = f"{os.path.dirname(os.path.realpath(__file__))}/kubernetes-wait.sh -f {kubernetes_config}"
-	process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
-	
-	# Wait until k8s (kubernetes-wait.sh) finishes and return the output
-	return process.communicate()[0].decode('utf-8')
+	if not parallel:
+		return run_wait(f"-f {kubernetes_config}")
+
 
 def get_no_of_procs(orca_method_file):
-	'''
-	Get number of CPU's required by orca method file
-
-	:param str orca_method_file: specify file path of orca method
-	:return: int number of required CPU's
-	'''
 	with open(orca_method_file) as ifile:
 		for line in ifile.readlines():
 			if "nprocs" in line:
 				return int(line.split()[1])
 		return -1
+
+
+def run_wait(command):
+	# Run the shell script to wait until kubernetes pod - container finishes
+	cmd = f"{os.path.dirname(os.path.realpath(__file__))}/kubernetes-wait.sh {command}"
+	process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
+
+	# Wait until k8s (kubernetes-wait.sh) finishes and return the output
+	return process.communicate()[0].decode('utf-8')

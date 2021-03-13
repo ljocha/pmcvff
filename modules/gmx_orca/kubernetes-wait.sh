@@ -1,10 +1,16 @@
 #!/bin/bash
 
-while getopts ":f:" opt; do
+unset filename
+unset label
+while getopts ":f:l:" opt; do
   case $opt in
     f)
       filename="$OPTARG"
       echo "waiting for $filename" >&2
+      ;;
+    l)
+      label="$OPTARG"
+      echo "waiting for jobs with label $label" >&2
       ;;
     \?)
       echo "Invalid option: -$OPTARG" >&2
@@ -27,16 +33,25 @@ if [[ -z $pod_name ]]; then
     echo "error finding pod" && exit 1
 fi
 
-kubectl wait --for=condition=complete -f $filename --timeout 14400s && exit 0 &
+FILENAME_FLAG=""
+if [[ -n $filename ]]; then
+    FILENAME_FLAG="-f $filename"
+fi
+LABEL_FLAG=""
+if [[ -n $label ]]; then
+    LABEL_FLAG="-l app=$label"
+fi
+
+kubectl wait --for=condition=complete "$FILENAME_FLAG $LABEL_FLAG" --timeout 14400s && exit 0 &
 completion_pid=$!
 
-kubectl wait --for=condition=failed -f $filename --timeout 14400s && exit 1 &
+kubectl wait --for=condition=failed "$FILENAME_FLAG $LABEL_FLAG" --timeout 14400s && exit 1 &
 failure_pid=$!
 
 wait -n $completion_pid $failure_pid
 exit_code=$?
 
-if (( $exit_code == 0 )); then
+if (( exit_code == 0 )); then
   echo "Job succeeded"
   pkill -P $failure_pid
 else
@@ -44,4 +59,4 @@ else
   pkill -P $completion_pid
 fi
 
-kubectl logs $pod_name
+kubectl logs "$LABEL_FLAG $pod_name"
