@@ -130,8 +130,7 @@ def write_template(method, image, command, workdir, parallel, **kwargs):
 		timestamp = str(time.time()).replace(".", "")
 		identificator = "{}-{}-rdtscp-{}".format(default_name, method, timestamp)
 		doc['metadata']['name'] = identificator
-		doc['spec']['template']['spec']['containers'][0]['name'] = "{}-{}-deployment-{}".format(default_name, method,
-																								timestamp)
+		doc['spec']['template']['spec']['containers'][0]['name'] = "{}-{}-deployment-{}".format(default_name, method, timestamp)
 
 		# Set label
 		if parallel:
@@ -142,8 +141,7 @@ def write_template(method, image, command, workdir, parallel, **kwargs):
 				doc['spec']['template']['metadata']['labels']['app'] = identificator
 
 		# Set gromacs args
-		doc['spec']['template']['spec']['containers'][0]['args'] = ["/bin/bash", "-c",
-																	DoubleQuotedScalarString(command)]
+		doc['spec']['template']['spec']['containers'][0]['args'] = ["/bin/bash", "-c", DoubleQuotedScalarString(command)]
 
 		# If not orca, set options for gmx container
 		if method != "orca":
