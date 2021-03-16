@@ -5,6 +5,7 @@ import subprocess
 import time
 import os
 import sys
+import pickle
 
 # Set image to be used for gromacs calculations
 GMX_IMAGE = "ljocha/gromacs:2021-1"
@@ -134,11 +135,15 @@ def write_template(method, image, command, workdir, parallel, **kwargs):
 
 		# Set label
 		if parallel:
-			try:
-				doc['spec']['template']['metadata']['labels']['app'] = os.environ['PARALLEL_LABEL']
-			except KeyError as e:
-				os.environ['PARALLEL_LABEL'] = identificator
-				doc['spec']['template']['metadata']['labels']['app'] = identificator
+			with open("lock.pkl","rw") as fp:
+				lock_object = pickle.load(fp)
+				if len(lock_object['Parallel_label']) == 0:
+					doc['spec']['template']['metadata']['labels']['app'] = identificator
+
+					label = {"Parallel_label": identificator}
+					pickle.dump(label, fp)
+				else:
+					doc['spec']['template']['metadata']['labels']['app'] = lock_object['Parallel_label']
 
 		# Set gromacs args
 		doc['spec']['template']['spec']['containers'][0]['args'] = ["/bin/bash", "-c", DoubleQuotedScalarString(command)]
