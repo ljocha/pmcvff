@@ -28,7 +28,7 @@ done
 name="$(cat $filename | grep name | head -1 | awk '{print $2}')"
 
 # get pod name with rancher hash
-pod_name="$(kubectl get pods -n mff-user-ns -o json | jq ".items[] | select(.metadata.name|test(\"$name\"))| .metadata.name" | tr -d \")"
+pod_name="$(kubectl get pods -n mff-prod-ns -o json | jq ".items[] | select(.metadata.name|test(\"$name\"))| .metadata.name" | tr -d \")"
 if [[ -z $pod_name ]]; then
     echo "error finding pod" && exit 1
 fi
