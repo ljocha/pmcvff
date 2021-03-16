@@ -42,10 +42,10 @@ if [[ -n $label ]]; then
     LABEL_FLAG="-l app=$label"
 fi
 
-kubectl wait --for=condition=complete "$FILENAME_FLAG $LABEL_FLAG" --timeout 14400s && exit 0 &
+kubectl wait --for=condition=complete $FILENAME_FLAG $LABEL_FLAG --timeout 14400s && exit 0 &
 completion_pid=$!
 
-kubectl wait --for=condition=failed "$FILENAME_FLAG $LABEL_FLAG" --timeout 14400s && exit 1 &
+kubectl wait --for=condition=failed $FILENAME_FLAG $LABEL_FLAG --timeout 14400s && exit 1 &
 failure_pid=$!
 
 wait -n $completion_pid $failure_pid
