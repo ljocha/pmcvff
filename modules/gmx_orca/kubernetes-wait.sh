@@ -49,4 +49,4 @@ else
   pkill -P $completion_pid
 fi
 
-kubectl logs "$label_flag" --tail=-1
+kubectl logs -l app=$label --tail=-1
