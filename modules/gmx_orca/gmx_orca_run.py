@@ -65,9 +65,9 @@ def gmx_run(gmx_command, **kwargs):
 		gmx = "| {}".format(gmx)
 		gmx = "(echo \'{}\'; sleep 1; echo q) {}".format(make_ndx, gmx)
 
-	kubernetes_config = write_template(gmx_method, image, gmx, workdir, parallel, double=double, rdtscp=rdtscp,
+	kubernetes_config, label = write_template(gmx_method, image, gmx, workdir, parallel, double=double, rdtscp=rdtscp,
 									   arch=arch)
-	print(run_job(kubernetes_config, parallel))
+	print(run_job(kubernetes_config, label, parallel))
 
 
 def orca_run(orca_method, log, **kwargs):
@@ -87,8 +87,8 @@ def orca_run(orca_method, log, **kwargs):
 	application = "orca"
 	orca = "/opt/orca/{} {} > {}".format(application, orca_method, log)
 
-	kubernetes_config = write_template(application, image, orca, workdir,parallel, orca_method_file=f"{workdir}/{orca_method}")
-	print(run_job(kubernetes_config, parallel))
+	kubernetes_config, label = write_template(application, image, orca, workdir,parallel, orca_method_file=f"{workdir}/{orca_method}")
+	print(run_job(kubernetes_config, label, parallel))
 
 
 def parallel_wait():
@@ -138,7 +138,7 @@ def write_template(method, image, command, workdir, parallel, **kwargs):
 		doc['spec']['template']['spec']['containers'][0]['name'] = "{}-{}-deployment-{}".format(default_name, method, timestamp)
 		doc['spec']['template']['metadata']['labels']['app'] = identificator
 
-		# Set label
+		# Set parallel label lock
 		if parallel:
 			with open("lock.pkl","rb") as fp:
 				lock_object = pickle.load(fp)
@@ -184,14 +184,15 @@ def write_template(method, image, command, workdir, parallel, **kwargs):
 		with open(ofile_name, "w") as ofile:
 			ruamel_yaml.round_trip_dump(doc, ofile, explicit_start=True)
 
-		return ofile_name
+		return ofile_name, identificator
 
 
-def run_job(kubernetes_config, parallel):
+def run_job(kubernetes_config, label, parallel):
 	os.system(f"kubectl apply -f {kubernetes_config}")
 
 	if not parallel:
-		return run_wait(f"-f {kubernetes_config}")
+		return run_wait(f"-l {label}")
+	return ""
 
 
 def get_no_of_procs(orca_method_file):
