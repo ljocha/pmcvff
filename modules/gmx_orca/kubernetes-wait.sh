@@ -23,29 +23,19 @@ while getopts ":f:l:" opt; do
   esac
 done
 
-
-# get pod base
-name="$(cat $filename | grep name | head -1 | awk '{print $2}')"
-
-# get pod name with rancher hash
-pod_name="$(kubectl get pods -n mff-prod-ns -o json | jq ".items[] | select(.metadata.name|test(\"$name\"))| .metadata.name" | tr -d \")"
-if [[ -z $pod_name ]]; then
-    echo "error finding pod" && exit 1
-fi
-
-FILENAME_FLAG=""
+filename_flag=""
 if [[ -n $filename ]]; then
-    FILENAME_FLAG="-f $filename"
+    filename_flag="-f $filename"
 fi
-LABEL_FLAG=""
+label_flag=""
 if [[ -n $label ]]; then
-    LABEL_FLAG="-l app=$label"
+    label_flag="jobs -l app=$label"
 fi
 
-kubectl wait --for=condition=complete $FILENAME_FLAG $LABEL_FLAG --timeout 14400s && exit 0 &
+kubectl wait --for=condition=complete $filename_flag $label_flag --timeout 14400s && exit 0 &
 completion_pid=$!
 
-kubectl wait --for=condition=failed $FILENAME_FLAG $LABEL_FLAG --timeout 14400s && exit 1 &
+kubectl wait --for=condition=failed $filename_flag $label_flag --timeout 14400s && exit 1 &
 failure_pid=$!
 
 wait -n $completion_pid $failure_pid
@@ -59,4 +49,4 @@ else
   pkill -P $completion_pid
 fi
 
-kubectl logs "$LABEL_FLAG $pod_name"
+kubectl logs "$label_flag" --tail=-1
