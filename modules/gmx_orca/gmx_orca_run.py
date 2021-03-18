@@ -136,14 +136,13 @@ def write_template(method, image, command, workdir, parallel, **kwargs):
 		identificator = "{}-{}-rdtscp-{}".format(default_name, method, timestamp)
 		doc['metadata']['name'] = identificator
 		doc['spec']['template']['spec']['containers'][0]['name'] = "{}-{}-deployment-{}".format(default_name, method, timestamp)
+		doc['spec']['template']['metadata']['labels']['app'] = identificator
 
 		# Set label
 		if parallel:
 			with open("lock.pkl","rb") as fp:
 				lock_object = pickle.load(fp)
 			if len(lock_object['Parallel_label']) == 0:
-				doc['spec']['template']['metadata']['labels']['app'] = identificator
-
 				label = {"Parallel_label": identificator}
 				with open("lock.pkl","wb") as fp:
 					pickle.dump(label, fp)
