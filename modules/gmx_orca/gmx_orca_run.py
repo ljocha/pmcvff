@@ -68,7 +68,6 @@ def gmx_run(gmx_command, **kwargs):
 	kubernetes_config = write_template(gmx_method, image, gmx, workdir, parallel, double=double, rdtscp=rdtscp,
 									   arch=arch)
 	print(run_job(kubernetes_config, parallel))
-	print('--------')
 
 
 def orca_run(orca_method, log, **kwargs):
@@ -90,7 +89,6 @@ def orca_run(orca_method, log, **kwargs):
 
 	kubernetes_config = write_template(application, image, orca, workdir,parallel, orca_method_file=f"{workdir}/{orca_method}")
 	print(run_job(kubernetes_config, parallel))
-	print('--------')
 
 
 def parallel_wait():
@@ -108,6 +106,10 @@ def parallel_wait():
 		print("Nothing to wait for. Run gmx_run or orca_run with parallel flag first", file=sys.stderr)
 	else:
 		print(run_wait(f"-l {label}"))
+
+		label = {"Parallel_label": ""}
+		with open('lock.pkl', 'wb') as fp:
+			pickle.dump(label, fp)
 
 
 def write_template(method, image, command, workdir, parallel, **kwargs):
@@ -207,4 +209,4 @@ def run_wait(command):
 	process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
 
 	# Wait until k8s (kubernetes-wait.sh) finishes and return the output
-	return process.communicate()[0].decode('utf-8')
+	return process.communicate()[0].decode('utf-8', 'ignore')
