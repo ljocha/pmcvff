@@ -11,6 +11,8 @@ import pickle
 GMX_IMAGE = "ljocha/gromacs:2021-1"
 # Set image to be used for orca calculations
 ORCA_IMAGE = "spectraes/pipeline_orca:latest"
+# Set default filepaths
+KUBERNETES_WAIT_PATH = PICKLE_PATH = os.path.dirname(os.path.realpath(__file__))
 
 
 def gmx_run(gmx_command, **kwargs):
@@ -98,7 +100,7 @@ def parallel_wait():
 	:return: Nothing
 	"""
 	label = None
-	with open('lock.pkl', 'rb') as fp:
+	with open(f'{PICKLE_PATH}/lock.pkl', 'rb') as fp:
 		lock_obj = pickle.load(fp)
 		label = lock_obj['Parallel_label']
 
@@ -108,7 +110,7 @@ def parallel_wait():
 		print(run_wait(f"-l {label}"))
 
 		label = {"Parallel_label": ""}
-		with open('lock.pkl', 'wb') as fp:
+		with open(f'{PICKLE_PATH}/lock.pkl', 'wb') as fp:
 			pickle.dump(label, fp)
 
 
@@ -140,11 +142,11 @@ def write_template(method, image, command, workdir, parallel, **kwargs):
 
 		# Set parallel label lock
 		if parallel:
-			with open("lock.pkl","rb") as fp:
+			with open(f"{PICKLE_PATH}/lock.pkl","rb") as fp:
 				lock_object = pickle.load(fp)
 			if len(lock_object['Parallel_label']) == 0:
 				label = {"Parallel_label": identificator}
-				with open("lock.pkl","wb") as fp:
+				with open(f"{PICKLE_PATH}/lock.pkl","wb") as fp:
 					pickle.dump(label, fp)
 			else:
 				doc['spec']['template']['metadata']['labels']['app'] = lock_object['Parallel_label']
@@ -205,7 +207,7 @@ def get_no_of_procs(orca_method_file):
 
 def run_wait(command):
 	# Run the shell script to wait until kubernetes pod - container finishes
-	cmd = f"{os.path.dirname(os.path.realpath(__file__))}/kubernetes-wait.sh {command}"
+	cmd = f"{KUBERNETES_WAIT_PATH}/kubernetes-wait.sh {command}"
 	process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
 
 	# Wait until k8s (kubernetes-wait.sh) finishes and return the output
