@@ -100,12 +100,14 @@ def parallel_wait():
 	:return: Nothing
 	"""
 	label = None
-	try:
-		label = os.environ['PARALLEL_LABEL']
-	except KeyError as e:
-		print("Nothing to wait for. Run gmx_run or orca_run with parallel flag first", file=sys.stderr)
+	with open('lock.pkl', 'rb') as fp:
+		lock_obj = pickle.load(fp)
+		label = lock_obj['Parallel_label']
 
-	print(run_wait(f"-l {label}"))
+	if len(label) == 0:
+		print("Nothing to wait for. Run gmx_run or orca_run with parallel flag first", file=sys.stderr)
+	else:
+		print(run_wait(f"-l {label}"))
 
 
 def write_template(method, image, command, workdir, parallel, **kwargs):
@@ -135,15 +137,16 @@ def write_template(method, image, command, workdir, parallel, **kwargs):
 
 		# Set label
 		if parallel:
-			with open("lock.pkl","rw") as fp:
+			with open("lock.pkl","rb") as fp:
 				lock_object = pickle.load(fp)
-				if len(lock_object['Parallel_label']) == 0:
-					doc['spec']['template']['metadata']['labels']['app'] = identificator
+			if len(lock_object['Parallel_label']) == 0:
+				doc['spec']['template']['metadata']['labels']['app'] = identificator
 
-					label = {"Parallel_label": identificator}
+				label = {"Parallel_label": identificator}
+				with open("lock.pkl","wb") as fp:
 					pickle.dump(label, fp)
-				else:
-					doc['spec']['template']['metadata']['labels']['app'] = lock_object['Parallel_label']
+			else:
+				doc['spec']['template']['metadata']['labels']['app'] = lock_object['Parallel_label']
 
 		# Set gromacs args
 		doc['spec']['template']['spec']['containers'][0]['args'] = ["/bin/bash", "-c", DoubleQuotedScalarString(command)]
