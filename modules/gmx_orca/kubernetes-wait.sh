@@ -25,6 +25,6 @@ if [[ -n $label ]]; then
 fi
 
 #workaround to experimental not working kubernetes wait - wait until all jobs with label finish
-kubectl logs -l app=$label --follow=true --tail=-1
+kubectl logs -f -l app=$label > /dev/null
 
-kubectl logs -l app=$label --tail=-1
+sleep 2 && kubectl logs -l app=$label --tail=-1
