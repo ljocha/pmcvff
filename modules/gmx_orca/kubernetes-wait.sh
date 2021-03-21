@@ -24,21 +24,7 @@ if [[ -n $label ]]; then
     label_flag="jobs -l app=$label"
 fi
 
-kubectl wait --for=condition=complete $label_flag --timeout 14400s && exit 0 &
-completion_pid=$!
-
-kubectl wait --for=condition=failed $label_flag --timeout 14400s && exit 1 &
-failure_pid=$!
-
-wait -n $completion_pid $failure_pid
-exit_code=$?
-
-if (( exit_code == 0 )); then
-  echo "Job succeeded"
-  pkill -P $failure_pid
-else
-  echo "Job failed"
-  pkill -P $completion_pid
-fi
+#workaround to experimental not working kubernetes wait - wait until all jobs with label finish
+kubectl logs -l app=$label --follow=true --tail=-1
 
 kubectl logs -l app=$label --tail=-1
