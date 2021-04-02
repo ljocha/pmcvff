@@ -12,7 +12,7 @@ GMX_IMAGE = "ljocha/gromacs:2021-1"
 # Set image to be used for orca calculations
 ORCA_IMAGE = "spectraes/pipeline_orca:latest"
 # Set default filepaths
-KUBERNETES_WAIT_PATH = PICKLE_PATH = os.path.dirname(os.path.realpath(__file__))
+KUBERNETES_WAIT_PATH = PICKLE_PATH = os.path.dirname(os.path.realpath(_file_))
 
 
 def gmx_run(gmx_command, **kwargs):
@@ -99,23 +99,12 @@ def parallel_wait():
 
 	:return: Nothing
 	"""
-	label = None
-	with open(f'{PICKLE_PATH}/lock.pkl', 'rb') as fp:
-		lock_obj = pickle.load(fp)
-		label = lock_obj['Parallel_label']
-
-	if len(label) == 0:
-		print("Nothing to wait for. Run gmx_run or orca_run with parallel flag first", file=sys.stderr)
-	else:
-		print(run_wait(f"-l {label}"))
-
-		label = {"Parallel_label": ""}
-		with open(f'{PICKLE_PATH}/lock.pkl', 'wb') as fp:
-			pickle.dump(label, fp)
+	
+	print(run_wait(f"-w"))
 
 
 def write_template(method, image, command, workdir, parallel, **kwargs):
-	with open(f"{os.path.dirname(os.path.realpath(__file__))}/kubernetes-template.yaml") as ifile:
+	with open(f"{os.path.dirname(os.path.realpath(_file_))}/kubernetes-template.yaml") as ifile:
 		doc = ruamel_yaml.round_trip_load(ifile, preserve_quotes=True)
 
 		double = kwargs.get('double', 'OFF')
@@ -130,7 +119,7 @@ def write_template(method, image, command, workdir, parallel, **kwargs):
 			default_image = ORCA_IMAGE
 			default_name = "orca"
 
-		# Always replace "_" with "-" because "_" is not kubernetes accepted char in the name
+		# Always replace "" with "-" because "" is not kubernetes accepted char in the name
 		method = method.replace("_", "-")
 
 		# Set names
@@ -139,17 +128,6 @@ def write_template(method, image, command, workdir, parallel, **kwargs):
 		doc['metadata']['name'] = identificator
 		doc['spec']['template']['spec']['containers'][0]['name'] = "{}-{}-deployment-{}".format(default_name, method, timestamp)
 		doc['spec']['template']['metadata']['labels']['app'] = identificator
-
-		# Set parallel label lock
-		if parallel:
-			with open(f"{PICKLE_PATH}/lock.pkl","rb") as fp:
-				lock_object = pickle.load(fp)
-			if len(lock_object['Parallel_label']) == 0:
-				label = {"Parallel_label": identificator}
-				with open(f"{PICKLE_PATH}/lock.pkl","wb") as fp:
-					pickle.dump(label, fp)
-			else:
-				doc['spec']['template']['metadata']['labels']['app'] = lock_object['Parallel_label']
 
 		# Set gromacs args
 		doc['spec']['template']['spec']['containers'][0]['args'] = ["/bin/bash", "-c", DoubleQuotedScalarString(command)]
@@ -160,6 +138,19 @@ def write_template(method, image, command, workdir, parallel, **kwargs):
 			rdtscp_env = {'name': "GMX_RDTSCP", 'value': DoubleQuotedScalarString("ON" if rdtscp else "OFF")}
 			arch_env = {'name': "GMX_ARCH", 'value': DoubleQuotedScalarString(arch)}
 			doc['spec']['template']['spec']['containers'][0]['env'] = [double_env, rdtscp_env, arch_env]
+
+		# If parallel is enabled set label so kubectl logs can print logs according to label
+		if parallel:
+			with open("lock", "r+") as lock_fp:
+				label = lock_fp.readline()
+				if label == "":
+					print("==> setting label")
+					lock_fp.write(identificator)
+				else:
+					print("==> label set, using the one in lock")
+					doc['spec']['template']['metadata']['labels']['app'] = label
+					identificator = label
+
 
 		# Set image
 		doc['spec']['template']['spec']['containers'][0]['image'] = default_image if not image else image
@@ -194,7 +185,7 @@ def run_job(kubernetes_config, label, parallel):
 
 	if not parallel:
 		return run_wait(f"-l {label}")
-	return ""
+	run_wait(f"-p -l {label}")
 
 
 def get_no_of_procs(orca_method_file):
@@ -209,6 +200,7 @@ def run_wait(command):
 	# Run the shell script to wait until kubernetes pod - container finishes
 	cmd = f"{KUBERNETES_WAIT_PATH}/kubernetes-wait.sh {command}"
 	process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
-
+	
 	# Wait until k8s (kubernetes-wait.sh) finishes and return the output
-	return process.communicate()[0].decode('utf-8', 'ignore')
+	return None if "-p" in command else process.communicate()[0].decode('utf-8', 'ignore')
+	
