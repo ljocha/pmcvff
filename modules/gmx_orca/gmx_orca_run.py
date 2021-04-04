@@ -12,7 +12,7 @@ GMX_IMAGE = "ljocha/gromacs:2021-1"
 # Set image to be used for orca calculations
 ORCA_IMAGE = "spectraes/pipeline_orca:latest"
 # Set default filepaths
-KUBERNETES_WAIT_PATH = PICKLE_PATH = os.path.dirname(os.path.realpath(_file_))
+KUBERNETES_WAIT_PATH = PICKLE_PATH = os.path.dirname(os.path.realpath(__file__))
 
 
 def gmx_run(gmx_command, **kwargs):
@@ -99,12 +99,24 @@ def parallel_wait():
 
 	:return: Nothing
 	"""
-	
-	print(run_wait(f"-w"))
+	with open(f"{PICKLE_PATH}/lock.pkl","rb") as fp:
+		lock_object = pickle.load(fp)
+		label = lock_object['Parallel_label']
+		count = lock_object['Count']
+		if len(label) == 0 or count <= 0:
+			print(f"Nothing to wait for with label => {label}", file=sys.stderr)
+			return 1
+
+	# reset pickle
+	with open(f"{PICKLE_PATH}/lock.pkl","wb") as fp:
+		values = {"Parallel_label": "", "Count": 0}
+		pickle.dump(values, fp)
+
+	print(run_wait(f"-l {label} -c {count}"))
 
 
 def write_template(method, image, command, workdir, parallel, **kwargs):
-	with open(f"{os.path.dirname(os.path.realpath(_file_))}/kubernetes-template.yaml") as ifile:
+	with open(f"{os.path.dirname(os.path.realpath(__file__))}/kubernetes-template.yaml") as ifile:
 		doc = ruamel_yaml.round_trip_load(ifile, preserve_quotes=True)
 
 		double = kwargs.get('double', 'OFF')
@@ -141,15 +153,14 @@ def write_template(method, image, command, workdir, parallel, **kwargs):
 
 		# If parallel is enabled set label so kubectl logs can print logs according to label
 		if parallel:
-			with open("lock", "r+") as lock_fp:
-				label = lock_fp.readline()
-				if label == "":
-					print("==> setting label")
-					lock_fp.write(identificator)
-				else:
-					print("==> label set, using the one in lock")
-					doc['spec']['template']['metadata']['labels']['app'] = label
-					identificator = label
+			with open(f"{PICKLE_PATH}/lock.pkl","rb") as fp:
+				lock_object = pickle.load(fp)
+			if len(lock_object['Parallel_label']) == 0:
+				label = {"Parallel_label": identificator, "Count": 0}
+				with open(f"{PICKLE_PATH}/lock.pkl","wb") as fp:
+					pickle.dump(label, fp)
+			else:
+				doc['spec']['template']['metadata']['labels']['app'] = lock_object['Parallel_label']
 
 
 		# Set image
@@ -184,8 +195,14 @@ def run_job(kubernetes_config, label, parallel):
 	os.system(f"kubectl apply -f {kubernetes_config}")
 
 	if not parallel:
-		return run_wait(f"-l {label}")
-	run_wait(f"-p -l {label}")
+		return run_wait(f"-l {label} -c 1")
+	
+	# increment pickle count
+	with open(f"{PICKLE_PATH}/lock.pkl","rb") as fp:
+		lock_object = pickle.load(fp)
+	with open(f"{PICKLE_PATH}/lock.pkl","wb") as fp:
+		lock_object['Count'] += 1 
+		pickle.dump(lock_object, fp)
 
 
 def get_no_of_procs(orca_method_file):

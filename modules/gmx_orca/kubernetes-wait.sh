@@ -1,21 +1,15 @@
 #!/bin/bash
 
 unset label
-unset parallel_wait 
-unset parallel
-while getopts ":l:wp" opt; do
+while getopts ":l:c:" opt; do
   case $opt in
     l)
       label="$OPTARG"
-      echo "waiting for job with label $label" >&2
+      echo "Waiting for job(s) with label $label" >&2
       ;;
-    p)
-      parallel="yes"
-      echo "running in parallel" >&2
-      ;;
-    w)
-      parallel_wait="yes"
-      echo "waiting for all parallel running jobs" >&2
+    c)
+      count=$OPTARG
+      echo "Waiting for $OPTARG jobs to complete" >&2
       ;;
     \?)
       echo "Invalid option: -$OPTARG" >&2
@@ -28,38 +22,19 @@ while getopts ":l:wp" opt; do
   esac
 done
 
-if [[ -n $parallel_wait ]]; then
-  pids=""
-  label=$(head -n 1 lock)
-  while read -r pid; do pids="$pids $pid"; done < tail -n +2 lock
-  if [[ -z $pids ]]; then
-    echo "Nothing to wait for" >&2
-    exit 1
-  fi
-  wait "$pids"
-  : > lock
-else
-  kubectl wait --for=condition=complete jobs -l app=$label && exit 0 &
-  completion_pid=$!
+while true; do
+  succeeded=`kubectl get jobs -l app="$label" -o 'jsonpath={..status.conditions[?(@.type=="Complete")].status}'`
+  no_of_succeeded=`echo "$succeeded" | wc -w`
 
-  kubectl wait --for=condition=failed jobs -l app=$label && exit 1 &
-  failure_pid=$!
+  failed=`kubectl get jobs -l app="$label" -o 'jsonpath={..status.conditions[?(@.type=="Failed")].status}'`
+  no_of_failed=`echo "$failed" | wc -w`
 
-  # write pid to lock in case of parallel run
-  if [[ -n $parallel ]]; then
-    echo "$$" >> lock
+  summ=$(( no_of_succeeded + no_of_failed ))
+  if [[ summ -eq count ]]; then
+    break
   fi
 
-  wait -n $completion_pid $failure_pid
-  exit_code=$?
-
-  if (( exit_code == 0 )); then
-    echo "Job succeeded"
-    pkill -P $failure_pid
-  else
-    echo "Job failed"
-    pkill -P $completion_pid
-  fi
-fi
+  sleep 1
+done
 
 kubectl logs -l app=$label --tail=-1
