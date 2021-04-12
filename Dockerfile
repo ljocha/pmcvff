@@ -69,7 +69,6 @@ RUN bash -c "apt-get install jq -y"
 
 #copy all necessary files to run force field correction evaluation
 COPY modules ${BASE}/modules/
-COPY ./gromacs-plumed-docker/gromacs/gmx-docker orca-docker podman-run.py /opt/
 COPY tleapin.txt ${SHARED_DIR}/
 
 #give permissions
