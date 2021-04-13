@@ -73,7 +73,7 @@ COPY tleapin.txt ${SHARED_DIR}/
 
 #give permissions
 RUN bash -c "chmod -R a+rX /opt /home"
-RUN bash -c "chmod -R u+rwx ${BASE}/modules/gmx_orca/lock.pkl
+RUN bash -c "chmod o+rwx ${BASE}/modules/gmx_orca/lock.pkl"
 
 WORKDIR ${SHARED_DIR}
 EXPOSE 8888
@@ -81,3 +81,4 @@ EXPOSE 8888
 
 #run Jupyter Notebook when container is executed
 CMD bash -c "sleep 2 && curl -LO https://gitlab.ics.muni.cz/467814/magicforcefield-pipeline/-/raw/kubernetes/pipelineJupyter.ipynb && source /opt/intelpython3/bin/activate && jupyter notebook --ip 0.0.0.0 --allow-root --port 8888"
+
