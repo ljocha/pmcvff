@@ -73,7 +73,7 @@ COPY tleapin.txt ${SHARED_DIR}/
 
 #give permissions
 RUN bash -c "chmod -R a+rX /opt /home"
-RUN bash -c "chmod o+rwx ${BASE}/modules/gmx_orca/lock.pkl"
+RUN bash -c "chmod a+rwx ${BASE}/modules/gmx_orca/lock.pkl"
 
 WORKDIR ${SHARED_DIR}
 EXPOSE 8888
