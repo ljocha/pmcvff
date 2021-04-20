@@ -31,4 +31,4 @@ spec:
           persistentVolumeClaim:
             claimName: SUBSTITUTE
   backoffLimit: 0
-  ttlSecondsAfterFinished: 86400
+  ttlSecondsAfterFinished: 604800
