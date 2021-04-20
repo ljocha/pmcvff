@@ -2,11 +2,11 @@ FROM ubuntu:18.04
 
 USER root
 
-COPY --from=spectraes/pmcv-pipeline-python:2021-04-19 /opt/intelpython3 /opt/intelpython3
-COPY --from=lachlanevenson/k8s-kubectl:v1.20.2 /usr/local/bin/kubectl /usr/local/bin/kubectl
-
 ENV DEBIAN_FRONTEND=noninteractive 
 ENV TZ=Europe/Prague
+
+COPY --from=spectraes/pmcv-pipeline-python:2021-04-19 /opt/intelpython3 /opt/intelpython3
+COPY --from=lachlanevenson/k8s-kubectl:v1.20.2 /usr/local/bin/kubectl /usr/local/bin/kubectl
 
 RUN bash -c "source /opt/intelpython3/bin/activate && jupyter-nbextension enable nglview --py --sys-prefix"
 RUN bash -c "apt-get update && apt-get install -y libxrender1 libgfortran3 git sudo jq apt-transport-https gnupg2 curl xz-utils"
@@ -23,15 +23,13 @@ RUN bash -c "curl -s -L https://nvidia.github.io/nvidia-docker/gpgkey | apt-key 
 RUN bash -c "curl -s -L -o /etc/apt/sources.list.d/nvidia-docker.list https://nvidia.github.io/nvidia-docker/$distribution/nvidia-docker.list" 
 RUN bash -c "apt update && apt install -y docker-ce-cli nvidia-container-toolkit"
 
-#copy all necessary files to run force field correction evaluation
+#copy all necessary files to run PMCV force field correction pipeline
 COPY modules /home/base/modules/
 COPY tleapin.txt /work/
 
-#add basic user
 RUN bash -c "useradd --uid 1001 --create-home --shell /bin/bash magic_user"
-#give permissions
-RUN bash -c "chmod -R a+rX /opt /home"
 RUN bash -c "chmod a+rwx /home/base/modules/gmx_orca/lock.pkl"
+RUN bash -c "chmod -R a+rX /opt /home"
 
 WORKDIR /work
 EXPOSE 8888
