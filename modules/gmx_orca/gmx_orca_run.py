@@ -1,4 +1,3 @@
-nvidia 34041856 56 nvidia_modeset,nvidia_uvm, Live 0xffffffffc0fb5000 (POE)
 #!/usr/bin/env python
 import ruamel_yaml
 from ruamel_yaml.scalarstring import DoubleQuotedScalarString
@@ -18,19 +17,19 @@ KUBERNETES_WAIT_PATH = PICKLE_PATH = os.path.dirname(os.path.realpath(__file__))
 
 def gmx_run(gmx_command, **kwargs):
         """
-    Converts gmx command into yaml file which is then run by kubernetes
-
-    :param str gmx_command: gromacs command
-    :kwargs int mpi_run: request number of cpus for mpi_run
-    :kwargs str groups: specify interactive groups for gromacs
-    :kwargs str make_ndx: specify interactive make_ndx input for gromacs make_ndx
-    :kwargs str image: specify used image
-    :kwargs str workdir: specify directory where should the calculation take place
-    :kwargs str arch: specify architecture
-    :kwargs bool double: double precision for mdrun
-    :kwargs bool rdtscp: enable rndscp
-    :kwargs bool parallel: run jobs as parallel
-    """
+        Converts gmx command into yaml file which is then run by kubernetes
+        
+        :param str gmx_command: gromacs command
+        :kwargs int mpi_run: request number of cpus for mpi_run
+        :kwargs str groups: specify interactive groups for gromacs
+        :kwargs str make_ndx: specify interactive make_ndx input for gromacs make_ndx
+        :kwargs str image: specify used image
+        :kwargs str workdir: specify directory where should the calculation take place
+        :kwargs str arch: specify architecture
+        :kwargs bool double: double precision for mdrun
+        :kwargs bool rdtscp: enable rndscp
+        :kwargs bool parallel: run jobs as parallel
+        """
 
         params = {
                 "mpi_run": kwargs.get('mpi_run', None),
@@ -75,13 +74,13 @@ def gmx_run(gmx_command, **kwargs):
 
 def orca_run(orca_method, log, **kwargs):
         """
-    Convert orca command into yaml file which is then run by kubernetes
+        Convert orca command into yaml file which is then run by kubernetes
 
-    :param str orca_command: orca method used for computation
-    :param str log: log file to store output of computation
-    :kwargs str image: specify used image
-    :kwargs str workdir: specify directory where should the calculation take place
-    """
+        :param str orca_command: orca method used for computation
+        :param str log: log file to store output of computation
+        :kwargs str image: specify used image
+        :kwargs str workdir: specify directory where should the calculation take place
+        """
 
         params = {
                 "image": kwargs.get('image', None),
