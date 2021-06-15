@@ -91,8 +91,9 @@ def orca_run(orca_method, log, **kwargs):
         log = f"/tmp/{log}"
         application = "orca"
         orca = "/opt/orca/{} {} > {}".format(application, orca_method, log)
+        method_path = "{}/{}".format(params['workdir'], orca_method)
 
-        kubernetes_config, label = write_template(application, orca, params, orca_method_file="{}/{}".format(params['workdir'], orca_method))
+        kubernetes_config, label = write_template(application, orca, params, orca_method_file=method_path)
         print(run_job(kubernetes_config, label, params["parallel"]))
 
 
