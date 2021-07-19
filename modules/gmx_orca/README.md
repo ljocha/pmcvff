@@ -41,7 +41,7 @@ gmx_run('mdrun -deffnm em1 -ntomp 2', workdir='/home', double=True, arch='AVX256
 ```
 
 
-# Orca
+# ***Orca***
 ***Mandatory arguments:***
 ```
 string orca_command      -       orca method (file) used for computation (1)
