@@ -4,6 +4,7 @@ Every minor software package needed is contained in the main pipeline image. [Gr
 This implies there is a need of connecting the main pipeline container with Gromacs and Orca containers. A wrapper has been written exactly for this purpose.  The wrapper is written in *Python* and converts the Gromacs/Orca command along with its arguments to a .yaml (Kubernetes job) configuration file. Based on this file the Kubernetes job is spawned where all computations happen. 
 
 # **Gromacs**
+## gmx_run()
 ***Mandatory argument:***
 
 ```
@@ -42,6 +43,7 @@ gmx_run('mdrun -deffnm em1 -ntomp 2', workdir='/home', double=True, arch='AVX256
 
 
 # ***Orca***
+## orca_run()
 ***Mandatory arguments:***
 ```
 string orca_command      -       orca method (file) used for computation (1)
@@ -63,4 +65,22 @@ bool parallel            -       run jobs in parallel (independently). Disabled 
 
 ```
 orca_run('method1.inp', 'output1.out", workdir='/home', parallel=True)
+```
+
+
+# ***Gromacs/Orca***
+## parallel_wait()
+This method has to be placed after a `gmx_run()` or `orca_run()` with *parallel* enabled. It is a wait mechanism to detect if all jobs running in parallel finished. Afterwards logs of these jobs are printed. 
+
+```
+orca_run('method1.inp', 'output1.out", workdir='/home', parallel=True)
+orca_run('method2.inp', 'output2.out", workdir='/home', parallel=True)
+
+parallel_wait()
+
+---
+
+for i in range 6:
+    orca_run(f'method{i}.inp', f'output{i}.out", workdir='/home', parallel=True)
+parallel_wait()
 ```
