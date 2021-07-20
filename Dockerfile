@@ -13,11 +13,11 @@ RUN bash -c "apt-get update && apt-get install -y libxrender1 libgfortran3 git s
 
 #install parmtSNE
 RUN bash -c "cd /opt && git clone https://github.com/spiwokv/parmtSNEcv.git" 
-RUN bash -c "source /opt/intelpython3/bin/activate && \
-             pip install 'ruamel.yaml<=0.15.94' && \ 
-             cd /opt/parmtSNEcv && \
-             pip install . && \
-             pip install --ignore-installed six tensorflow"
+RUN source /opt/intelpython3/bin/activate && \
+    pip install 'ruamel.yaml<=0.15.94' && \ 
+    cd /opt/parmtSNEcv && \
+    pip install . && \
+    pip install --ignore-installed six tensorflow
 
 #install other tools
 ARG DISTRIBUTION=ubuntu18.04
@@ -38,8 +38,8 @@ WORKDIR /work
 EXPOSE 8888
 
 
-CMD bash -c "/opt/init.sh && \
-             sleep 2 && \
-             curl -LO https://gitlab.ics.muni.cz/467814/magicforcefield-pipeline/-/raw/kubernetes/pipelineJupyter.ipynb && \
-             source /opt/intelpython3/bin/activate && \
-             jupyter notebook --ip 0.0.0.0 --allow-root --port 8888"
+CMD /opt/init.sh && \
+    sleep 2 && \
+    curl -LO https://gitlab.ics.muni.cz/467814/magicforcefield-pipeline/-/raw/kubernetes/pipelineJupyter.ipynb && \
+    source /opt/intelpython3/bin/activate && \
+    jupyter notebook --ip 0.0.0.0 --allow-root --port 8888
