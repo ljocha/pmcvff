@@ -1,0 +1,18 @@
+name: pyenv
+channels:
+    - conda-forge
+dependencies:
+    - openbabel
+    - jupyter
+    - tqdm
+    - openbabel
+    - jupyter
+    - tqdm
+    - molvs
+    - nglview
+    - matplotlib
+    - py3dmol
+    - ruamel.yaml
+    - ambertools=21
+    - acpype
+    - plotly
