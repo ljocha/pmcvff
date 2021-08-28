@@ -103,6 +103,7 @@ def parmtsnecv_run(command, **kwargs):
         params = {
                 "image": kwargs.get('image', None),
                 "workdir": kwargs.get('workdir', None),
+                "parallel": None
         }
 
         application = 'parmtsnecv'
