@@ -7,6 +7,8 @@ import os
 import sys
 import pickle
 
+import k8s_utils
+
 
 def gmx_run(gmx_command, **kwargs):
         """
@@ -61,8 +63,8 @@ def gmx_run(gmx_command, **kwargs):
                 gmx = "| {}".format(gmx)
                 gmx = "(echo \'{}\'; sleep 1; echo q) {}".format(params["make_ndx"], gmx)
 
-        kubernetes_config, label = write_template(gmx_method, gmx, params)         
-        print(run_job(kubernetes_config, label, params["parallel"]))
+        kubernetes_config, label = k8s_utils.write_template(gmx_method, gmx, params)         
+        print(k8s_utils.run_job(kubernetes_config, label, params["parallel"]))
 
 
 def orca_run(orca_method, log, **kwargs):
@@ -86,8 +88,8 @@ def orca_run(orca_method, log, **kwargs):
         orca = "/opt/orca/{} {} > {}".format(application, orca_method, log)
         method_path = "{}/{}".format(params['workdir'], orca_method)
 
-        kubernetes_config, label = write_template(application, orca, params, orca_method_file=method_path)
-        print(run_job(kubernetes_config, label, params["parallel"]))
+        kubernetes_config, label = k8s_utils.write_template(application, orca, params, orca_method_file=method_path)
+        print(k8s_utils.run_job(kubernetes_config, label, params["parallel"]))
 
 
 def parmtsnecv_run(command, **kwargs):
@@ -104,8 +106,8 @@ def parmtsnecv_run(command, **kwargs):
         }
 
         application = 'parmtsnecv'
-        kubernetes_config, label = write_template(application, command, params)
-        print(run_job(kubernetes_config, label, None))
+        kubernetes_config, label = k8s_utils.write_template(application, command, params)
+        print(k8s_utils.run_job(kubernetes_config, label, None))
 
 
 def parallel_wait():
@@ -127,5 +129,5 @@ def parallel_wait():
                 values = {"Parallel_label": "", "Count": 0}
                 pickle.dump(values, fp)
 
-        print(run_wait(f"-l {label} -c {count}"))
+        print(k8s_utils.run_wait(f"-l {label} -c {count}"))
 

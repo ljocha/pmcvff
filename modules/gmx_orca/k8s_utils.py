@@ -7,10 +7,9 @@ import os
 import sys
 import pickle
 
-# Set image to be used for gromacs calculations
 GMX_IMAGE = "ljocha/gromacs:2021-1"
-# Set image to be used for orca calculations
 ORCA_IMAGE = "spectraes/pipeline_orca:latest"
+PARMTSNECV_IMAGE = "spectraes/parmtsnecv:28-08-2021"
 # Set default filepaths
 KUBERNETES_WAIT_PATH = PICKLE_PATH = os.path.dirname(os.path.realpath(__file__))
 
@@ -24,8 +23,8 @@ def write_template(method, command, params, **kwargs):
                 # Always replace "" with "-" because "" is not kubernetes accepted char in the name
                 method = method.replace("_", "-")
                 # Set default values
-                default_image = GMX_IMAGE
-                default_name = "gromacs"
+                default_image = ''
+                default_name = ''
 
 
                 if method == "orca":
@@ -36,11 +35,17 @@ def write_template(method, command, params, **kwargs):
                     no_of_procs = get_no_of_procs(orca_method_file)
                     if no_of_procs != -1:
                         doc['spec']['template']['spec']['containers'][0]['resources']['requests']['cpu'] = no_of_procs
-                else:
+                elif method == 'gromacs':
+                    default_image = GMX_IMAGE
+                    default_name = 'gromacs'
+
                     double_env = {'name': "GMX_DOUBLE", 'value': DoubleQuotedScalarString("ON" if params["double"] else "OFF")}
                     rdtscp_env = {'name': "GMX_RDTSCP", 'value': DoubleQuotedScalarString("ON" if params["rdtscp"] else "OFF")}
                     arch_env = {'name': "GMX_ARCH", 'value': DoubleQuotedScalarString(params["arch"])}
                     doc['spec']['template']['spec']['containers'][0]['env'] = [double_env, rdtscp_env, arch_env]
+                elif method == 'parmtsnecv':
+                    default_image = PARMTSNECV_IMAGE
+                    default_name = 'parmtsnecv'
                 
 
                 identificator = "{}-{}-rdtscp-{}".format(default_name, method, timestamp)
