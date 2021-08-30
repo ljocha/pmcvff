@@ -7,7 +7,7 @@ import os
 import sys
 import pickle
 
-import modules.k8s.k8s_utils
+import modules.k8s.k8s_utils as k8s_utils
 from modules.k8s.config import Config
 
 
