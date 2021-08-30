@@ -7,11 +7,7 @@ import os
 import sys
 import pickle
 
-GMX_IMAGE = "ljocha/gromacs:2021-1"
-ORCA_IMAGE = "spectraes/pipeline_orca:latest"
-PARMTSNECV_IMAGE = "spectraes/parmtsnecv:28-08-2021"
-# Set default filepaths
-KUBERNETES_WAIT_PATH = PICKLE_PATH = os.path.dirname(os.path.realpath(__file__))
+from modules.k8s.config import Config
 
 
 def write_template(method, command, params, **kwargs):
@@ -28,7 +24,7 @@ def write_template(method, command, params, **kwargs):
 
 
                 if method == "orca":
-                    default_image = ORCA_IMAGE
+                    default_image = Config.ORCA_IMAGE
                     default_name = "orca"
                     
                     # Set orca required cpus
@@ -36,10 +32,10 @@ def write_template(method, command, params, **kwargs):
                     if no_of_procs != -1:
                         doc['spec']['template']['spec']['containers'][0]['resources']['requests']['cpu'] = no_of_procs
                 elif method == 'parmtsnecv':
-                    default_image = PARMTSNECV_IMAGE
+                    default_image = Config.PARMTSNECV_IMAGE
                     default_name = 'parmtsnecv'
                 else:
-                    default_image = GMX_IMAGE
+                    default_image = Config.GMX_IMAGE
                     default_name = 'gromacs'
 
                     double_env = {'name': "GMX_DOUBLE", 'value': DoubleQuotedScalarString("ON" if params["double"] else "OFF")}
@@ -71,11 +67,11 @@ def write_template(method, command, params, **kwargs):
 
                 # If parallel is enabled set label so kubectl logs can print logs according to label
                 if params["parallel"]:
-                        with open(f"{PICKLE_PATH}/lock.pkl","rb") as fp:
+                        with open(f"{Config.PICKLE_PATH}/lock.pkl","rb") as fp:
                                 lock_object = pickle.load(fp)
                         if len(lock_object['Parallel_label']) == 0:
                                 label = {"Parallel_label": identificator, "Count": 0}
-                                with open(f"{PICKLE_PATH}/lock.pkl","wb") as fp:
+                                with open(f"{Config.PICKLE_PATH}/lock.pkl","wb") as fp:
                                         pickle.dump(label, fp)
                         else:
                                 doc['spec']['template']['metadata']['labels']['app'] = lock_object['Parallel_label']
@@ -95,9 +91,9 @@ def run_job(kubernetes_config, label, parallel):
                 return run_wait(f"-l {label} -c 1")
         
         # increment pickle count
-        with open(f"{PICKLE_PATH}/lock.pkl","rb") as fp:
+        with open(f"{Config.PICKLE_PATH}/lock.pkl","rb") as fp:
                 lock_object = pickle.load(fp)
-        with open(f"{PICKLE_PATH}/lock.pkl","wb") as fp:
+        with open(f"{Config.PICKLE_PATH}/lock.pkl","wb") as fp:
                 lock_object['Count'] += 1 
                 pickle.dump(lock_object, fp)
 
@@ -111,7 +107,7 @@ def get_no_of_procs(orca_method_file):
 
 
 def run_wait(command):
-        cmd = f"{KUBERNETES_WAIT_PATH}/kubernetes-wait.sh {command}"
+        cmd = f"{Config.KUBERNETES_WAIT_PATH}/kubernetes-wait.sh {command}"
         process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
         
         return process.communicate()[0].decode('utf-8', 'ignore')

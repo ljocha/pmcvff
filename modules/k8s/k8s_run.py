@@ -8,6 +8,7 @@ import sys
 import pickle
 
 import modules.k8s.k8s_utils
+from modules.k8s.config import Config
 
 
 def gmx_run(gmx_command, **kwargs):
@@ -117,7 +118,7 @@ def parallel_wait():
 
         :return: Nothing
         """
-        with open(f"{PICKLE_PATH}/lock.pkl","rb") as fp:
+        with open(f"{Config.PICKLE_PATH}/lock.pkl","rb") as fp:
                 lock_object = pickle.load(fp)
                 label = lock_object['Parallel_label']
                 count = lock_object['Count']
@@ -126,7 +127,7 @@ def parallel_wait():
                         return 1
 
         # reset pickle
-        with open(f"{PICKLE_PATH}/lock.pkl","wb") as fp:
+        with open(f"{Config.PICKLE_PATH}/lock.pkl","wb") as fp:
                 values = {"Parallel_label": "", "Count": 0}
                 pickle.dump(values, fp)
 
