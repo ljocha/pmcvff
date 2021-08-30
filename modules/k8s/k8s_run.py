@@ -7,7 +7,7 @@ import os
 import sys
 import pickle
 
-import k8s_utils
+import modules.k8s.k8s_utils
 
 
 def gmx_run(gmx_command, **kwargs):
