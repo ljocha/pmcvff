@@ -35,7 +35,10 @@ def write_template(method, command, params, **kwargs):
                     no_of_procs = get_no_of_procs(orca_method_file)
                     if no_of_procs != -1:
                         doc['spec']['template']['spec']['containers'][0]['resources']['requests']['cpu'] = no_of_procs
-                elif method == 'gromacs':
+                elif method == 'parmtsnecv':
+                    default_image = PARMTSNECV_IMAGE
+                    default_name = 'parmtsnecv'
+                else:
                     default_image = GMX_IMAGE
                     default_name = 'gromacs'
 
@@ -43,9 +46,7 @@ def write_template(method, command, params, **kwargs):
                     rdtscp_env = {'name': "GMX_RDTSCP", 'value': DoubleQuotedScalarString("ON" if params["rdtscp"] else "OFF")}
                     arch_env = {'name': "GMX_ARCH", 'value': DoubleQuotedScalarString(params["arch"])}
                     doc['spec']['template']['spec']['containers'][0]['env'] = [double_env, rdtscp_env, arch_env]
-                elif method == 'parmtsnecv':
-                    default_image = PARMTSNECV_IMAGE
-                    default_name = 'parmtsnecv'
+
                 
 
                 identificator = "{}-{}-rdtscp-{}".format(default_name, method, timestamp)
