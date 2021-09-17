@@ -46,7 +46,6 @@ ENV HOME=/work
 WORKDIR /work
 EXPOSE 8888
 
-
-CMD curl -LO https://gitlab.ics.muni.cz/467814/magicforcefield-pipeline/-/raw/kubernetes/pipelineJupyter.ipynb && \
-    jupyter notebook --ip 0.0.0.0 --allow-root --port 8888"
+CMD curl -LO https://gitlab.ics.muni.cz/467814/magicforcefield-pipeline/-/raw/master/pipelineJupyter.ipynb && \
+    jupyter notebook --ip 0.0.0.0 --allow-root --port 8888
 
