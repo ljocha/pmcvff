@@ -18,19 +18,19 @@ USER root
 RUN apt update && apt install -y curl
 RUN curl -fsSLo /usr/share/keyrings/kubernetes-archive-keyring.gpg https://packages.cloud.google.com/apt/doc/apt-key.gpg
 RUN bash -c 'echo "deb [signed-by=/usr/share/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" >/etc/apt/sources.list.d/kubernetes.list'
-RUN apt update
-RUN apt install -y kubectl
+RUN apt update && apt install -y kubectl
 
-# resolve throttling
-RUN mkdir -p /home/jovyan/.kube && ln -s /mnt/secret/config/config.yaml /home/jovyan/.kube/config.yaml
+RUN mkdir -p /home/jovyan/.kube 
 
 COPY --from=build /opt/conda/envs /opt/conda/envs
 COPY modules /home/base/modules/
 COPY pipelineJupyter.ipynb tleapin.txt /tmp/base
+COPY init.sh /opt
 
 ENV PATH="/opt/conda/envs/pyenv/bin:/opt/conda/bin:$PATH"
 ENV PYTHONPATH="/home/base"
-ENV KUBECONFIG="/home/jovyan/.kube/config.yaml"
 
-RUN bash -c "python -m ipykernel install --user"
+# installed in Jupyterhub Hooks
+# USER jovyan
+# RUN bash -c "python -m ipykernel install --user"
 
