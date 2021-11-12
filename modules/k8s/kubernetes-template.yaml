@@ -9,8 +9,8 @@ spec:
         app: SUBSTITUTE
     spec:
       securityContext:
-        runAsUser: 1001
-        fsGroup: 1001
+        runAsUser: 1000
+        fsGroup: 100
       nodeSelector:
         node-role.kubernetes.io/worker: "true"
       containers:

@@ -1,12 +1,7 @@
 #!/bin/bash
 
-# add production user and permissions
-useradd --uid 1001 --create-home --shell /bin/bash magic_user
-chmod a+rwx /home/base/modules/k8s/lock.pkl
-chmod -R a+rX /opt /home
-
 # create all directories used in computations
-cd /work
+cd $HOME 
 mkdir -p em
 mkdir -p md
 mkdir -p mtd

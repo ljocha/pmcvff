@@ -131,5 +131,5 @@ def parallel_wait():
                 values = {"Parallel_label": "", "Count": 0}
                 pickle.dump(values, fp)
 
-        print(k8s_utils.run_wait(f"-l {label} -c {count}"))
+        print(k8s_utils.run_wait(f"-l {label} -c {count} -n mff-prod-ns "))
 

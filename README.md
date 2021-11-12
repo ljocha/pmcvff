@@ -1,29 +1,24 @@
-Run instructions:
+# Property map collective variable force field correction
+Molecular dynamics simulations rely on so-called forcefields, which contain specific parameters that determine the properties of molecules. These parameters are well tuned for biopolymers such as proteins, but struggle to faithfully reproduce the behavior of smaller organic molecules due to their high chemical diversity. Therefore, the force fields need to be reparameterized for each such molecule. We provide a pipeline that automatizes this process. It generates landmark structures, and it calculates the correction  between  accurate  quantum  mechanics  and  the less accurate force field. The deployment is available publicly. The whole workflow is divided into few big steps. Each step is divided into its own set of logically grouped Jupyter notebook cells. Most of these steps can be customized by the user - parameters of calculations can be changed accordingly. Visualizations are provided for the results after multiple steps, and the user can decide whether to change the parameters and repeat the step or continue the computation. The table also  illustrates the needed software. The majority of steps need Gromacs, which uses the same Docker container image as the Protein folding space exploration use case. Another software  we need is Orca, which is containerized in Docker as well (3.4 GB). Last software which is better containerised (due to Python 2 version) is parmtSNEcv. The rest is installed directly and no other container is needed.
+
+## News
+
+### v3.0
+- added whole new interface to access the pipeline -> Jupyterhub
+- added orca image
+- added parmtSNEcv image
+- reworked pipeline Docker image to be compatible with Jupyterhub
+- reworked Kubernetes mechanism
+
+## Run instructions
 
 1. Go to https://pmcvff-correction.cerit-sc.cz/
-2. Log in via Elixir
+2. Log in via **Elixir**
 3. Start your own pipeline
 4. Use the pipeline
 
 ---
 
-Bonus info:
-- you can check output of each orca method in orca_output directory
-
----
----
----
-
-Build instructions:
-
-Before executing build script, you need to get all necessary software
-which has to be downloaded/set manually:
-
-* Podman or Docker: https://podman.io/ or https://www.docker.com/
-* IntelPython: https://software.intel.com/en-us/distribution-for-python/choose-download
-    * note1: if there has been released new version, which is not set in Dockerfile, contact me or just set new version in Dockerfile manually
-    * note2: download it to pipeline directory (where Dockerfile is)
-* Git clone: https://gitlab.ics.muni.cz/3086/gromacs-plumed-docker
-    * note: clone it inside pipeline directory
-
-1. Execute script build.sh with flag -p for podman (no flag for docker) which will build the image for pipeline
+**Bonus info:**
+- you can check the output of each method via (Linux) terminal on Jupyterhub
+- you can watch progress of computation in detail (via terminal) in log files

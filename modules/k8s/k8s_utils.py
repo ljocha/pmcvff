@@ -60,7 +60,7 @@ def write_template(method, command, params, **kwargs):
                         doc['spec']['template']['spec']['containers'][0]['workingDir'] += params["workdir"]
 
                 # set PVC
-                pvc_name = os.environ['PVC_NAME']
+                pvc_name = f'claim-{os.environ["JUPYTERHUB_USER"]}'
                 if len(pvc_name) == 0:
                         raise Exception("Error setting pvc_name, probably problem in setting env variable of actual container")
                 doc['spec']['template']['spec']['volumes'][0]['persistentVolumeClaim']['claimName'] = pvc_name
@@ -85,10 +85,10 @@ def write_template(method, command, params, **kwargs):
 
 
 def run_job(kubernetes_config, label, parallel):
-        os.system(f"kubectl apply -f {kubernetes_config}")
+        os.system(f"kubectl apply -n mff-prod-ns -f {kubernetes_config}")
 
         if not parallel:
-                return run_wait(f"-l {label} -c 1")
+                return run_wait(f"-l {label} -c 1 -n mff-prod-ns")
         
         # increment pickle count
         with open(f"{Config.PICKLE_PATH}/lock.pkl","rb") as fp:

@@ -10,42 +10,27 @@ COPY environment.yml .
 RUN conda env create -f environment.yml 
 
 
-FROM ubuntu:20.04
+FROM jupyterhub/k8s-singleuser-sample:1.1.3
 
 USER root
 
-ENV DEBIAN_FRONTEND=noninteractive
-ENV TZ=Europe/Prague
-
-RUN apt-get update && apt-get install -y \
-    python3-distutils \
-    python3-rdkit \
-    librdkit1 \
-    rdkit-data \
-    curl \
-    sudo
-
+# install k8s
+RUN apt update && apt install -y curl
 RUN curl -fsSLo /usr/share/keyrings/kubernetes-archive-keyring.gpg https://packages.cloud.google.com/apt/doc/apt-key.gpg
 RUN bash -c 'echo "deb [signed-by=/usr/share/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" >/etc/apt/sources.list.d/kubernetes.list'
-RUN apt update
-RUN apt install -y kubectl
+RUN apt update && apt install -y kubectl
 
-COPY --from=build /opt/conda/envs/pyenv /opt/conda/envs/pyenv
-#COPY --from=build /opt/conda /opt/conda
+RUN mkdir -p /home/jovyan/.kube 
 
-#copy all necessary files to run PMCV force field correction pipeline
+COPY --from=build /opt/conda/envs /opt/conda/envs
 COPY modules /home/base/modules/
-COPY tleapin.txt /work/
-COPY init.sh /opt/
-RUN bash -c "/opt/init.sh"
+COPY pipelineJupyter.ipynb tleapin.txt /tmp/base
+COPY init.sh /opt
 
-ENV PATH="$PATH:/opt/conda/envs/pyenv/bin"
-ENV PYTHONPATH=/home/base
-ENV HOME=/work
+ENV PATH="/opt/conda/envs/pyenv/bin:/opt/conda/bin:$PATH"
+ENV PYTHONPATH="/home/base"
 
-WORKDIR /work
-EXPOSE 8888
-
-CMD curl -LO https://gitlab.ics.muni.cz/467814/magicforcefield-pipeline/-/raw/master/pipelineJupyter.ipynb && \
-    jupyter notebook --ip 0.0.0.0 --allow-root --port 8888
+# installed in Jupyterhub Hooks
+# USER jovyan
+# RUN bash -c "python -m ipykernel install --user"
 
