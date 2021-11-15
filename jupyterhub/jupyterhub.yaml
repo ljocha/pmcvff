@@ -203,10 +203,10 @@ singleuser:
     pullSecrets: []
   startTimeout: 300
   cpu:
-    limit:
-    guarantee: 1
+    limit: 1
+    guarantee: 200m
   memory:
-    limit:
+    limit: 1G
     guarantee: 1G
   extraResource:
     limits: {}
