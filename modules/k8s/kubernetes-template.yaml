@@ -16,14 +16,17 @@ spec:
       containers:
         - name: SUBSTITUTE
           image: SUBSTITUTE
+          imagePullPolicy: IfNotPresent
           args: []
           volumeMounts:
             - mountPath: /tmp
               name: shared-volume
           resources:
             limits:
+              memory: 8G
               cpu: 12
             requests:
+              memory: 3G
               cpu: 4
       restartPolicy: Never
       volumes:
