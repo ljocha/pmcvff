@@ -1,8 +1,10 @@
 FROM ubuntu:20.04
 
+ENV DEBIAN_FRONTEND noninteractive
+
 RUN apt-get update && apt-get install -y openmpi-bin && apt-get install xz-utils
 
-ARG ORCA=orca_4_2_1_linux_x86-64_shared_openmpi216
+ARG ORCA=orca_5_0_1_linux_x86-64_shared_openmpi411
 COPY ${ORCA}.tar.xz /tmp
 WORKDIR /opt
 RUN tar -xvf /tmp/${ORCA}.tar.xz
