@@ -198,13 +198,13 @@ singleuser:
       storageAccessModes: [ReadWriteMany]
   image:
     name: spectraes/jmagichub
-    tag: "alpha6"
+    tag: "alpha11"
     pullPolicy:
     pullSecrets: []
   startTimeout: 300
   cpu:
-    limit: 1
-    guarantee: 200m
+    limit: 2
+    guarantee: 1
   memory:
     limit: 1G
     guarantee: 1G
