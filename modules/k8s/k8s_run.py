@@ -99,15 +99,18 @@ def parmtsnecv_run(command, **kwargs):
 
         :kwargs str image: specify used image
         :kwargs str workdir: specify directory where should the calculation take place
+        :kwargs str logfile: location of log file
         '''
 
         params = {
                 "image": kwargs.get('image', None),
                 "workdir": kwargs.get('workdir', None),
+                "logfile": kwargs.get('logfile', None),
                 "parallel": None
         }
 
         application = 'parmtsnecv'
+        command = f"{command} > {logfile}"
         kubernetes_config, label = k8s_utils.write_template(application, command, params)
         print(k8s_utils.run_job(kubernetes_config, label, None))
 
