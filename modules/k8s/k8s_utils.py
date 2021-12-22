@@ -11,17 +11,17 @@ from modules.k8s.config import Config
 
 
 def write_template(method, command, params, **kwargs):
-        with open(f"{os.path.dirname(os.path.realpath(__file__))}/kubernetes-template.yaml") as ifile:
+        orca_method_file = kwargs.get('orca_method_file', '')
+        timestamp = str(time.time()).replace(".", "")
+        # Always replace "" with "-" because "" is not kubernetes accepted char in the name
+        method = method.replace("_", "-")
+        # Set default values
+        default_image = ''
+        default_name = ''
+
+        template_file = "orca-k8s-template.yaml" if method == "orca" else "gmx-k8s-template.yaml"
+        with open(f"{os.path.dirname(os.path.realpath(__file__))}/{template_file}") as ifile:
                 doc = ruamel.yaml.round_trip_load(ifile, preserve_quotes=True)
-
-                orca_method_file = kwargs.get('orca_method_file', '')
-                timestamp = str(time.time()).replace(".", "")
-                # Always replace "" with "-" because "" is not kubernetes accepted char in the name
-                method = method.replace("_", "-")
-                # Set default values
-                default_image = ''
-                default_name = ''
-
 
                 if method == "orca":
                     default_image = Config.ORCA_IMAGE
@@ -29,8 +29,10 @@ def write_template(method, command, params, **kwargs):
                     
                     # Set orca required cpus
                     no_of_procs = get_no_of_procs(orca_method_file)
-                    if no_of_procs != -1:
+                    if no_of_procs != -1 or no_of_procs <= 12:
                         doc['spec']['template']['spec']['containers'][0]['resources']['requests']['cpu'] = no_of_procs
+                    else:
+                        doc['spec']['template']['spec']['containers'][0]['resources']['requests']['cpu'] = 12
                 elif method == 'parmtsnecv':
                     default_image = Config.PARMTSNECV_IMAGE
                     default_name = 'parmtsnecv'
