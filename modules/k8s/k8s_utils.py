@@ -29,7 +29,7 @@ def write_template(method, command, params, **kwargs):
                     
                     # Set orca required cpus
                     no_of_procs = get_no_of_procs(orca_method_file)
-                    if no_of_procs != -1 or no_of_procs <= 12:
+                    if no_of_procs != -1 and no_of_procs <= 12:
                         doc['spec']['template']['spec']['containers'][0]['resources']['requests']['cpu'] = no_of_procs
                     else:
                         doc['spec']['template']['spec']['containers'][0]['resources']['requests']['cpu'] = 12
