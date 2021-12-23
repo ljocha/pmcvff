@@ -110,7 +110,7 @@ def parmtsnecv_run(command, **kwargs):
         }
 
         application = 'parmtsnecv'
-        command = f"{command} > {logfile}"
+        command = f"{command} > {params['logfile']}" if params['logfile'] else command
         kubernetes_config, label = k8s_utils.write_template(application, command, params)
         print(k8s_utils.run_job(kubernetes_config, label, None))
 
