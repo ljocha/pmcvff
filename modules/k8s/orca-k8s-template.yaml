@@ -33,13 +33,14 @@ spec:
             cpu: SUBSTITUTE
       restartPolicy: Never
       volumes:
+      - name: shared-volume
+        persistentVolumeClaim:
+          claimName: SUBSTITUTE
       - name: shared-mem
         emptyDir:
           medium: Memory
           sizeLimit: 1Gi
-      - name: shared-volume
-        persistentVolumeClaim:
-          claimName: SUBSTITUTE
+
   backoffLimit: 0
   ttlSecondsAfterFinished: 604800
 
