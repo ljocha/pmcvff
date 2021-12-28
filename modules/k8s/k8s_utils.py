@@ -65,7 +65,7 @@ def write_template(method, command, params, **kwargs):
                 pvc_name = f'claim-{os.environ["JUPYTERHUB_USER"]}'
                 if len(pvc_name) == 0:
                         raise Exception("Error setting pvc_name, probably problem in setting env variable of actual container")
-                doc['spec']['template']['spec']['volumes'][1]['persistentVolumeClaim']['claimName'] = pvc_name
+                doc['spec']['template']['spec']['volumes'][0]['persistentVolumeClaim']['claimName'] = pvc_name
 
                 # If parallel is enabled set label so kubectl logs can print logs according to label
                 if params["parallel"]:
