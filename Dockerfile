@@ -23,7 +23,7 @@ RUN apt update && apt install -y kubectl
 RUN mkdir -p /home/jovyan/.kube 
 
 COPY --from=build /opt/conda/envs /opt/conda/envs
-COPY modules/draw_3d.py /home/base/modules/
+COPY modules /home/base/modules/
 COPY pipelineJupyter.ipynb tleapin.txt /tmp/base
 COPY init.sh modules/orcajobcheck.py /opt
 
