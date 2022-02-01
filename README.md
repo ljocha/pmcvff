@@ -3,12 +3,13 @@ Molecular dynamics simulations rely on so-called forcefields, which contain spec
 
 ## News
 
-### v3.0
-- added whole new interface to access the pipeline -> Jupyterhub
-- added orca image
-- added parmtSNEcv image
-- reworked pipeline Docker image to be compatible with Jupyterhub
-- reworked Kubernetes mechanism
+### v3.1
+- updated HW limitations
+- refactor of Jupyter Notebook
+- updated Orca software from 4.2.1 to 5.0.1
+- minor bug fixes
+- fixed visualisations
+- atomised repository
 
 ## Run instructions
 
