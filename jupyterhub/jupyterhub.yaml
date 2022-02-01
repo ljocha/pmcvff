@@ -112,6 +112,7 @@ ingress:
     kubernetes.io/ingress.class: nginx
     cert-manager.io/cluster-issuer: "letsencrypt-prod"
     external-dns.alpha.kubernetes.io/target: "k8s-public-a.cerit-sc.cz"
+    nginx.ingress.kubernetes.io/proxy-body-size: 16m
   hosts:
     - pmcvff-correction.cerit-sc.cz
   tls:
@@ -198,15 +199,15 @@ singleuser:
       storageAccessModes: [ReadWriteMany]
   image:
     name: spectraes/jmagichub
-    tag: "alpha6"
+    tag: "alpha11"
     pullPolicy:
     pullSecrets: []
   startTimeout: 300
   cpu:
-    limit:
+    limit: 2
     guarantee: 1
   memory:
-    limit:
+    limit: 1G
     guarantee: 1G
   extraResource:
     limits: {}

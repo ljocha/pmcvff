@@ -1,0 +1,46 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: SUBSTITUTE 
+spec:
+  template:
+    metadata:
+      labels:
+        app: SUBSTITUTE 
+    spec:
+      securityContext:
+        runAsUser: 1000
+        fsGroup: 100
+      nodeSelector:
+        node-role.kubernetes.io/worker: "true"
+      containers:
+      - name: SUBSTITUTE 
+        image: SUBSTITUTE 
+        imagePullPolicy: IfNotPresent
+        args: []
+        volumeMounts:
+        - mountPath: /dev/shm
+          name: shared-mem
+        - mountPath: /tmp
+          name: shared-volume
+        resources:
+          limits:
+            memory: 8G
+            cpu: 12
+          requests:
+            memory: 5G
+            cpu: SUBSTITUTE
+      restartPolicy: Never
+      volumes:
+      - name: shared-volume
+        persistentVolumeClaim:
+          claimName: SUBSTITUTE
+      - name: shared-mem
+        emptyDir:
+          medium: Memory
+          sizeLimit: 1Gi
+
+  backoffLimit: 0
+  ttlSecondsAfterFinished: 604800
+

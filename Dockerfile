@@ -25,7 +25,7 @@ RUN mkdir -p /home/jovyan/.kube
 COPY --from=build /opt/conda/envs /opt/conda/envs
 COPY modules /home/base/modules/
 COPY pipelineJupyter.ipynb tleapin.txt /tmp/base
-COPY init.sh /opt
+COPY init.sh modules/orcajobcheck.py /opt
 
 ENV PATH="/opt/conda/envs/pyenv/bin:/opt/conda/bin:$PATH"
 ENV PYTHONPATH="/home/base"
