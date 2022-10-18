@@ -1,3 +1,7 @@
+prePuller:    
+  continuous:
+    enabled: false
+
 debug:
   enabled: true
 
