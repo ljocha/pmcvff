@@ -10,6 +10,10 @@ spec:
         app: SUBSTITUTE 
     spec:
       securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+        fsGroupChangePolicy: OnRootMismatch
         runAsUser: 1000
         fsGroup: 100
       nodeSelector:
@@ -31,6 +35,11 @@ spec:
           requests:
             memory: 5G
             cpu: SUBSTITUTE
+          securityContext:
+            capabilities:
+              drop:
+                - ALL
+            allowPrivilegeEscalation: false
       restartPolicy: Never
       volumes:
       - name: shared-volume
