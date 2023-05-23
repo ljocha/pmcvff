@@ -5,6 +5,9 @@ Molecular dynamics simulations rely on so-called forcefields, which contain spec
 22.5.2023
 ### v3.2
 - updated jupyterhub to 2.0.0
+- minor bugfixes
+- added security properties to pods
+- adjusted singleuser image
 
 ## Run instructions
 
