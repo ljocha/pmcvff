@@ -385,7 +385,7 @@ singleuser:
     blockWithIptables: false
     ip: 169.254.169.254
   networkPolicy:
-    enabled: true
+    enabled: false 
     ingress: []
     egress: []
     egressAllowRules:
@@ -435,7 +435,7 @@ singleuser:
       storageAccessModes: [ReadWriteMany]
   image:
     name: spectraes/jmagichub
-    tag: "15-02-2022-02"
+    tag: "23-05-2023"
     pullPolicy:
     pullSecrets: []
   startTimeout: 300
