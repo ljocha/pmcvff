@@ -35,11 +35,11 @@ spec:
           requests:
             memory: 5G
             cpu: SUBSTITUTE
-          securityContext:
-            capabilities:
-              drop:
-                - ALL
-            allowPrivilegeEscalation: false
+        securityContext:
+          capabilities:
+            drop:
+              - ALL
+          allowPrivilegeEscalation: false
       restartPolicy: Never
       volumes:
       - name: shared-volume
