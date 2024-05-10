@@ -33,4 +33,3 @@ ENV PYTHONPATH="/home/base"
 # installed in Jupyterhub Hooks
 # USER jovyan
 # RUN bash -c "python -m ipykernel install --user"
-
